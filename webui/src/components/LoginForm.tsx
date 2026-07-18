@@ -33,7 +33,7 @@ export function LoginForm() {
           <p className="text-slate-400">Trading Intelligence Platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-dark-900 rounded-xl p-6 border border-slate-800">
+        <form onSubmit={handleSubmit} className="card p-6">
           <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
 
           {error && (
@@ -52,7 +52,7 @@ export function LoginForm() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                 placeholder="Enter your username"
                 required
               />
@@ -67,7 +67,7 @@ export function LoginForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                 placeholder="Enter your password"
                 required
               />
