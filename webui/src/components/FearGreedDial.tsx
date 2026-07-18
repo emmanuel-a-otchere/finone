@@ -64,9 +64,6 @@ export function FearGreedDial() {
               </text>
             );
           })}
-          <text x={cx} y={cy + 46} textAnchor="middle" fontSize="11" fill="var(--text-muted)" fontFamily="var(--font-ui)">
-            FEAR &amp; GREED INDEX
-          </text>
         </svg>
       </div>
     </div>
