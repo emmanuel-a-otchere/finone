@@ -1,6 +1,8 @@
 // HotSymbols — P1-4: tabs disabled when no signals exist
+// P1-3: empty state uses the shared EmptyState pattern (icon + message), like all other cards
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { EmptyState } from './EmptyState';
 import type { Signal } from '../types';
 
 interface HotSymbolsProps {
@@ -60,9 +62,7 @@ export function HotSymbols({ signals }: HotSymbolsProps) {
       </div>
       <div className="card-body" style={{ overflow: 'hidden' }}>
         {!hasSignals ? (
-          <div className="flex items-center justify-center h-full">
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>No active signals — generate signals on the Signals page</span>
-          </div>
+          <EmptyState icon="⚡" message="No active signals — generate signals on the Signals page" />
         ) : (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 2fr 1.8fr 1.8fr', gap: 8, padding: '0 16px 6px', borderBottom: '1px solid var(--border-subtle)' }}>

@@ -29,8 +29,8 @@ export function Layout({ children, currentPage, onNavigate, pageTitle }: LayoutP
           {children}
         </main>
       </div>
-      {/* Mobile tab bar — only below 1024px */}
-      <div className="lg:hidden">
+      {/* Mobile tab bar — only below 768px; never overlaps the sidebar/icon rail */}
+      <div className="md:hidden">
         <BottomNav currentPage={currentPage} onNavigate={onNavigate} />
       </div>
     </div>

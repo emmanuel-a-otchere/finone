@@ -63,11 +63,6 @@ function colSpan(allocation: number): number {
   return 1;
 }
 
-function colSpanKey(allocation: number): string {
-  const s = colSpan(allocation);
-  return s === 3 ? 'lg' : s === 2 ? 'md' : 'sm';
-}
-
 // Sort by allocation desc; equal-span groups maintain visual hierarchy
 const sorted = [...CELLS].sort((a, b) => b.allocation - a.allocation);
 

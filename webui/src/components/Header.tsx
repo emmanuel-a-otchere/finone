@@ -128,7 +128,8 @@ function SearchBar({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   };
 
   return (
-    <div style={{ position: 'relative' }} ref={wrapperRef}>
+    // Responsive: search hidden below 640px to declutter the mobile top bar
+    <div className="hidden sm:block" style={{ position: 'relative' }} ref={wrapperRef}>
       <form
         onSubmit={(e) => { e.preventDefault(); if (open && results.length) handleSelect(results[0]); }}
         style={{ position: 'relative' }}
@@ -357,8 +358,8 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
         )}
       </div>
 
-      {/* App version */}
-      <span aria-label="App version 2.5.0" style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', cursor: 'default' }}>v2.5.0</span>
+      {/* App version — hidden below 768px to declutter the mobile top bar */}
+      <span aria-label="App version 2.5.0" className="hidden md:inline" style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', cursor: 'default' }}>v2.5.0</span>
     </header>
   );
 }

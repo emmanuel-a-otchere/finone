@@ -24,7 +24,6 @@ const FOREX_SYMBOLS = new Set(['EUR/USD']);
 // P2-1: VIX is inversely correlated to market — invert its color signal
 // Rising VIX = fear rising = negative → show RED
 // Falling VIX = fear declining = positive → show GREEN
-const VIX_NEUTRAL_COLOR = 'var(--yellow)'; // flat VIX = yellow warning
 
 function vixColor(up: boolean): string {
   // Inverted: standard green/red is OPPOSITE for VIX
@@ -86,34 +85,15 @@ export function TickerStrip({ tickers: propTickers }: Props) {
     }
   }, [propTickers]);
 
-  if (!tickers.length) return null;
-
+  // P0-1: ALWAYS render the strip — returning null here removes grid child #1
+  // from .dashboard-grid and shifts every card's :nth-child placement.
+  // With no data, render a stable-height placeholder instead.
   const doubled = [...tickers, ...tickers];
 
+  // NOTE: ticker animation CSS lives in index.css (.ticker-track / .ticker-fade)
+  // so this component renders exactly ONE grid child in .dashboard-grid —
+  // <style> siblings would shift :nth-child card placement.
   return (
-    <>
-      <style>{`
-        @keyframes ticker-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .ticker-track {
-          animation: ticker-scroll 40s linear infinite;
-          will-change: transform;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .ticker-track { animation: none; }
-        }
-        .ticker-fade {
-          position: absolute;
-          top: 0; right: 0;
-          width: 60px;
-          height: 100%;
-          background: linear-gradient(to right, transparent, var(--bg-surface));
-          pointer-events: none;
-          z-index: 2;
-        }
-      `}</style>
       <div style={{
         height: 40,
         background: 'var(--bg-surface)',
@@ -124,6 +104,11 @@ export function TickerStrip({ tickers: propTickers }: Props) {
         zIndex: 10,
       }}>
         <div className="ticker-fade" />
+        {tickers.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 11, color: 'var(--text-muted)' }}>
+            Market data unavailable
+          </div>
+        ) : (
         <div className="ticker-track" style={{ display: 'flex', alignItems: 'center', height: '100%', whiteSpace: 'nowrap' }}>
           {doubled.map((t, i) => {
             const isVix = t.symbol === 'VIX';
@@ -154,7 +139,7 @@ export function TickerStrip({ tickers: propTickers }: Props) {
             );
           })}
         </div>
+        )}
       </div>
-    </>
   );
 }
