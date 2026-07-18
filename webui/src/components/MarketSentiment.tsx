@@ -32,13 +32,8 @@ function Sparkline7({ data, up }: { data: number[]; up: boolean }) {
   return <canvas ref={canvasRef} style={{ width: 120, height: 28, display: 'block' }} />;
 }
 
-// P2-5: SegmentedControl — pill group with 44px touch target on mobile
-const styles = `
-  @media (max-width: 767px) {
-    .seg-control { min-height: 44px !important; }
-  }
-`;
-
+// P2-5: .seg-control media query lives in index.css (shared) — no <style> tag here,
+// so this component renders exactly ONE grid child in .dashboard-grid.
 export function MarketSentiment() {
   const [period, setPeriod] = useState('1D');
   const value = HISTORY[HISTORY.length - 1];
@@ -48,8 +43,6 @@ export function MarketSentiment() {
   const label = value >= 65 ? 'Bullish' : value >= 45 ? 'Neutral' : 'Bearish';
 
   return (
-    <>
-      <style>{styles}</style>
       <div className="card" data-card="kpi" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="card-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 8px', flexShrink: 0 }}>
           <span className="card-title">MARKET SENTIMENT</span>
@@ -59,7 +52,7 @@ export function MarketSentiment() {
             borderRadius: 6, border: '1px solid var(--border)', padding: 2,
             minHeight: 44, alignItems: 'center',          // 44px on mobile
           }}>
-            {PERIODS.map((p, i) => (
+            {PERIODS.map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
@@ -101,6 +94,5 @@ export function MarketSentiment() {
         </div>
         <div className="card-footer" style={{ height: 28, flexShrink: 0 }} />
       </div>
-    </>
   );
 }

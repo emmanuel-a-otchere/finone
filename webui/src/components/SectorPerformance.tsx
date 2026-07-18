@@ -8,12 +8,7 @@ type SectorResponse = Record<string, number>;
 const PERIODS = ['1D', '1W', '1M'] as const;
 type Period = typeof PERIODS[number];
 
-const styles = `
-  @media (max-width: 767px) {
-    .seg-control { min-height: 44px !important; }
-  }
-`;
-
+// P2-5: .seg-control media query lives in index.css (shared) — no <style> tag here.
 export function SectorPerformance() {
   const [period, setPeriod] = useState<Period>('1D');
   const { data, loading } = useCachedApi<SectorResponse>(
@@ -22,8 +17,6 @@ export function SectorPerformance() {
   const sectors = data ? Object.entries(data) : [];
 
   return (
-    <>
-      <style>{styles}</style>
       <div className="card" data-card="chart-lg" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="card-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 8px', flexShrink: 0 }}>
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>SECTOR PERFORMANCE</span>
@@ -80,6 +73,5 @@ export function SectorPerformance() {
         </div>
         <div style={{ height: 28, flexShrink: 0 }} />
       </div>
-    </>
   );
 }
