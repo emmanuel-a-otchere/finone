@@ -84,13 +84,13 @@ export function Settings() {
       <h1 className="text-2xl font-bold text-white">Settings</h1>
 
       {/* Tab Bar */}
-      <div className="flex gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+      <div className="flex gap-2 border-b border-token pb-2 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              activeTab === tab.id ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white hover:bg-dark-800'
+              activeTab === tab.id ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white hover-bg-token'
             }`}
           >
             {tab.icon}{tab.label}
@@ -108,7 +108,7 @@ export function Settings() {
       {activeTab === 'watchlist' && (
         <div className="space-y-6">
           {/* Add Symbol */}
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Add Symbol to Watchlist</h2>
             <div className="flex flex-wrap gap-3">
               <input
@@ -116,12 +116,12 @@ export function Settings() {
                 onChange={e => setNewSymbol(e.target.value.toUpperCase())}
                 onKeyDown={e => e.key === 'Enter' && handleAddSymbol()}
                 placeholder="SYMBOL (e.g. AAPL)"
-                className="w-40 px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 uppercase"
+                className="w-40 px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 uppercase"
               />
               <select
                 value={newTimeframe}
                 onChange={e => setNewTimeframe(e.target.value)}
-                className="px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="px-4 py-2.5 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500"
               >
                 <option value="day_trade">Day Trade (1h expiry)</option>
                 <option value="swing">Swing (24h expiry)</option>
@@ -133,7 +133,7 @@ export function Settings() {
                 onChange={e => setNewMinConf(Number(e.target.value))}
                 min={0} max={100}
                 placeholder="Min conf %"
-                className="w-32 px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="w-32 px-4 py-2.5 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500"
               />
               <button
                 onClick={handleAddSymbol}
@@ -146,9 +146,9 @@ export function Settings() {
           </div>
 
           {/* Watchlist Table */}
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Watchlist ({watchlist.length})</h2>
+              <h2 className="card-title">Watchlist ({watchlist.length})</h2>
               <span className="text-xs text-slate-500">Signals auto-generate every 15 min via PM2 cron</span>
             </div>
             {watchlist.length === 0 ? (
@@ -157,7 +157,7 @@ export function Settings() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-slate-400 border-b border-slate-800">
+                    <tr className="text-slate-400 border-b border-token">
                       <th className="text-left py-2 px-3">Symbol</th>
                       <th className="text-left py-2 px-3">Timeframe</th>
                       <th className="text-left py-2 px-3">Min Conf</th>
@@ -168,7 +168,7 @@ export function Settings() {
                   </thead>
                   <tbody>
                     {watchlist.map(item => (
-                      <tr key={item.id} className="border-b border-slate-800/50 hover:bg-dark-800/50">
+                      <tr key={item.id} className="border-b border-token-subtle hover-bg-token">
                         <td className="py-3 px-3 font-mono font-medium text-white">{item.symbol}</td>
                         <td className="py-3 px-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -197,7 +197,7 @@ export function Settings() {
             )}
 
             {/* Generate & Expire Actions */}
-            <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-slate-800">
+            <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-token">
               <button
                 onClick={handleGenerate}
                 disabled={genLoading}
@@ -232,14 +232,14 @@ export function Settings() {
 
           {/* Pending Signals */}
           {pendingSignals.length > 0 && (
-            <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+            <div className="card p-6">
               <h2 className="text-lg font-semibold text-white mb-4">
                 Active Signals Awaiting Expiry ({pendingSignals.length})
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-slate-400 border-b border-slate-800">
+                    <tr className="text-slate-400 border-b border-token">
                       <th className="text-left py-2 px-3">Symbol</th>
                       <th className="text-left py-2 px-3">Type</th>
                       <th className="text-left py-2 px-3">Conf</th>
@@ -253,7 +253,7 @@ export function Settings() {
                       const expiresAt = sig.expires_at ? new Date(sig.expires_at) : null;
                       const isStale = expiresAt && expiresAt < new Date();
                       return (
-                        <tr key={sig.id} className="border-b border-slate-800/50">
+                        <tr key={sig.id} className="border-b border-token-subtle">
                           <td className="py-3 px-3 font-mono font-medium text-white">{sig.symbol}</td>
                           <td className="py-3 px-3 text-blue-400">{sig.protocol_type}</td>
                           <td className="py-3 px-3 text-slate-300">{sig.confidence_score}%</td>
@@ -284,10 +284,10 @@ export function Settings() {
       {activeTab === 'notifications' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* NTFY Settings */}
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 space-y-6">
+          <div className="card p-6 space-y-6">
             <div className="flex items-center gap-3">
               <Bell className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">NTFY Alerts</h2>
+              <h2 className="card-title">NTFY Alerts</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -302,14 +302,14 @@ export function Settings() {
                 <input type="text" value={notifications.ntfyTopic}
                   onChange={e => setNotifications(n => ({ ...n, ntfyTopic: e.target.value }))}
                   placeholder="e.g. systemone-alerts"
-                  className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
+                  className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
                 <div className="text-xs text-slate-600 mt-1">Subscribe at <a href="https://ntfy.sh" target="_blank" className="text-primary-400 underline">ntfy.sh</a> /{' '}<span className="text-slate-400">{notifications.ntfyTopic}</span></div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Priority</label>
                 <select value={notifications.priority}
                   onChange={e => setNotifications(n => ({ ...n, priority: e.target.value }))}
-                  className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500">
+                  className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500">
                   <option value="default">Default</option>
                   <option value="min">Min (quiet)</option>
                   <option value="low">Low</option>
@@ -326,7 +326,7 @@ export function Settings() {
                     alert(d.ok ? '✅ Test alert sent! Check ntfy.sh /' + notifications.ntfyTopic : '❌ ' + (d.error || 'Failed'));
                   } catch(e) { alert('Error: ' + e); }
                 }}
-                  className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg text-sm transition-colors">
+                  className="px-4 py-2 bg-inset hover-bg-token text-white rounded-lg text-sm transition-colors">
                   Send Test Alert
                 </button>
                 <button onClick={async () => {
@@ -338,7 +338,7 @@ export function Settings() {
                     else { alert('No alerts sent yet.'); }
                   } catch(e) { alert('Error: ' + e); }
                 }}
-                  className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-slate-300 rounded-lg text-sm transition-colors">
+                  className="px-4 py-2 bg-inset hover-bg-token text-slate-300 rounded-lg text-sm transition-colors">
                   View History
                 </button>
               </div>
@@ -346,10 +346,10 @@ export function Settings() {
           </div>
 
           {/* Alert Types */}
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 space-y-6">
+          <div className="card p-6 space-y-6">
             <div className="flex items-center gap-3">
               <Bell className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">Alert Types</h2>
+              <h2 className="card-title">Alert Types</h2>
             </div>
             <div className="space-y-4">
               {[{ key: 'onNewSignal', label: 'New Signal', desc: 'Alert when a new signal is generated' }, { key: 'onSignalExpire', label: 'Signal Expiry', desc: 'Alert when a signal reaches its expiration' }, { key: 'onPriceAlert', label: 'Price Alert', desc: 'Alert on significant price moves' }].map(item => (
@@ -376,10 +376,10 @@ export function Settings() {
       {/* === OPTIMIZATION TAB === */}
       {activeTab === 'optimization' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3 mb-6">
               <Cpu className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">Optimization</h2>
+              <h2 className="card-title">Optimization</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -396,7 +396,7 @@ export function Settings() {
                 <label className="block text-sm font-medium text-slate-300 mb-2">Target Metric</label>
                 <select value={optimization.targetMetric}
                   onChange={e => setOptimization(o => ({ ...o, targetMetric: e.target.value }))}
-                  className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500">
+                  className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500">
                   <option value="sharpe_ratio">Sharpe Ratio</option>
                   <option value="max_drawdown">Max Drawdown</option>
                   <option value="win_rate">Win Rate</option>
@@ -408,7 +408,7 @@ export function Settings() {
                 <label className="block text-sm font-medium text-slate-300 mb-2">Retrain Frequency</label>
                 <select value={optimization.retrainFrequency}
                   onChange={e => setOptimization(o => ({ ...o, retrainFrequency: e.target.value }))}
-                  className="w-full px-4 py-2.5 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500">
+                  className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500">
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
@@ -422,17 +422,17 @@ export function Settings() {
       {/* === SECURITY TAB === */}
       {activeTab === 'security' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3 mb-6">
               <Shield className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">Security</h2>
+              <h2 className="card-title">Security</h2>
             </div>
             <div className="space-y-4">
-              <div className="p-4 bg-dark-800 rounded-lg">
+              <div className="p-4 bg-inset rounded-lg">
                 <div className="text-sm font-medium text-white">Authentication</div>
                 <div className="text-xs text-slate-500 mt-1">htpasswd-style file with bcrypt + JWT</div>
               </div>
-              <div className="p-4 bg-dark-800 rounded-lg">
+              <div className="p-4 bg-inset rounded-lg">
                 <div className="text-sm font-medium text-white">Session Duration</div>
                 <div className="text-xs text-slate-500 mt-1">24 hours</div>
               </div>
@@ -447,33 +447,33 @@ export function Settings() {
       {/* === SYSTEM TAB === */}
       {activeTab === 'system' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3 mb-6">
               <Database className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">System Info</h2>
+              <h2 className="card-title">System Info</h2>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">Version</span>
                 <span className="text-sm font-medium text-white">1.1.0</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">Database</span>
                 <span className="text-sm font-medium text-success-400">Connected</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">Signal Scheduler</span>
                 <span className="text-sm font-medium text-success-400">Running (PM2)</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">ML Models</span>
                 <span className="text-sm font-medium text-success-400">Loaded</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">Watchlist Symbols</span>
                 <span className="text-sm font-medium text-white">{watchlist.length}</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-inset rounded-lg">
                 <span className="text-sm text-slate-400">Active Signals</span>
                 <span className="text-sm font-medium text-white">{pendingSignals.length}</span>
               </div>
@@ -485,13 +485,13 @@ export function Settings() {
       {/* === THEME TAB === */}
       {activeTab === 'theme' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 space-y-6">
+          <div className="card p-6 space-y-6">
             <div className="flex items-center gap-3">
               <Sun className="w-5 h-5 text-primary-400" />
-              <h2 className="text-lg font-semibold text-white">Appearance</h2>
+              <h2 className="card-title">Appearance</h2>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 bg-dark-800 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-inset rounded-xl">
                 <div className="flex items-center gap-3">
                   <Moon className="w-5 h-5 text-slate-400" />
                   <div>
@@ -499,11 +499,11 @@ export function Settings() {
                     <div className="text-xs text-slate-500">Always on (locked dark)</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 bg-dark-900 px-3 py-1 rounded-full border border-slate-700">
+                <div className="flex items-center gap-2 text-xs text-slate-500 bg-inset px-3 py-1 rounded-full border border-token">
                   Active
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 bg-dark-800 rounded-xl opacity-60">
+              <div className="flex items-center justify-between p-4 bg-inset rounded-xl opacity-60">
                 <div className="flex items-center gap-3">
                   <Sun className="w-5 h-5 text-slate-400" />
                   <div>
@@ -511,7 +511,7 @@ export function Settings() {
                     <div className="text-xs text-slate-500">Coming soon</div>
                   </div>
                 </div>
-                <div className="text-xs text-slate-600 bg-dark-900 px-3 py-1 rounded-full border border-slate-700">
+                <div className="text-xs text-slate-600 bg-inset px-3 py-1 rounded-full border border-token">
                   Soon
                 </div>
               </div>
