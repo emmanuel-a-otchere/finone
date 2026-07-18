@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Menu, Star, Bell, Sun, Moon, Search } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../hooks/useAuth';
 import { NavId } from '../NavId';
@@ -143,8 +144,8 @@ function SearchBar({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           onFocus={() => query.trim() && results.length && setOpen(true)}
           style={{ width: 180, height: 30, fontSize: 11, paddingLeft: 32 }}
         />
-        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: 11 }}>
-          {loading ? '…' : '🔍'}
+        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: 11, display: 'flex', alignItems: 'center' }}>
+          {loading ? '…' : <Search size={12} strokeWidth={1.8} aria-hidden />}
         </span>
       </form>
 
@@ -269,9 +270,9 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
       <button
         aria-label="Toggle sidebar"
         onClick={() => {}}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 18, padding: 4 }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        ☰
+        <Menu size={18} strokeWidth={1.8} aria-hidden />
       </button>
 
       {/* Page title */}
@@ -294,18 +295,18 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
         onClick={() => onNavigate('watchlist')}
         aria-label="Watchlist"
         title="Watchlist"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 16, padding: 4, borderRadius: 4 }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: 4, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        ★
+        <Star size={16} strokeWidth={1.8} aria-hidden />
       </button>
 
       {/* Notifications */}
       <button
         aria-label="Notifications"
         title="Notifications"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 16, padding: 4, borderRadius: 4, position: 'relative' }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: 4, borderRadius: 4, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        🔔
+        <Bell size={16} strokeWidth={1.8} aria-hidden />
         <span style={{ position: 'absolute', top: 2, right: 2, width: 6, height: 6, borderRadius: '50%', background: 'var(--red)', border: '1px solid var(--bg-surface)' }} />
       </button>
 
@@ -314,9 +315,9 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
         onClick={toggleTheme}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
         title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
-        style={{ background: 'none', border: '1px solid var(--border-default)', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 13, padding: '3px 7px', borderRadius: 6 }}
+        style={{ background: 'none', border: '1px solid var(--border-default)', cursor: 'pointer', color: 'var(--text-secondary)', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        {isDark ? '☀' : '☽'}
+        {isDark ? <Sun size={14} strokeWidth={1.8} aria-hidden /> : <Moon size={14} strokeWidth={1.8} aria-hidden />}
       </button>
 
       {/* User menu */}
