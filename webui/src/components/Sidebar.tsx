@@ -1,17 +1,22 @@
-// Sidebar — P2-3: contrast pass (8px→11px labels, text-secondary)
-// P2-4: no label truncation — icon-only rail at 64px; expanded panel at 180px shows full labels
-// P2-5: 44px touch targets on <768px via md:hidden class approach
+// Sidebar — compact horizontal rows: 18px lucide icon + 12px label, 36px min-height.
+// ≥1024px: full 208px sidebar · 768–1023px: 64px icon rail (labels hidden via CSS,
+// icons auto-center) · <768px: hidden (bottom tab bar takes over)
 import { useState, useEffect, useRef } from 'react';
+import {
+  LayoutDashboard, LineChart, Zap, Search, Layers, Briefcase,
+  Star, Newspaper, Bell, ClipboardList, Settings, ChevronDown,
+  type LucideIcon,
+} from 'lucide-react';
 import { type NavId, getParentNavId, isUnderParent } from '../NavId';
 
 interface SubItem { label: string; navId: NavId; }
-interface NavItem { id: NavId; label: string; icon: string; subItems?: SubItem[]; }
+interface NavItem { id: NavId; label: string; icon: LucideIcon; subItems?: SubItem[]; }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard',    label: 'Dashboard',        icon: '⊞' },
-  { id: 'market',       label: 'Market Overview',   icon: '📊' },
-  { id: 'signals',      label: 'Signals',            icon: '⚡' },
-  { id: 'screener',     label: 'Screener',           icon: '🔍',
+  { id: 'dashboard',    label: 'Dashboard',        icon: LayoutDashboard },
+  { id: 'market',       label: 'Market Overview',  icon: LineChart },
+  { id: 'signals',      label: 'Signals',          icon: Zap },
+  { id: 'screener',     label: 'Screener',         icon: Search,
     subItems: [
       { label: 'Stock Screener',  navId: 'screener-stock' },
       { label: 'ETF Screener',    navId: 'screener-etf' },
@@ -19,7 +24,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Saved Screens',   navId: 'screener-saved' },
     ],
   },
-  { id: 'layers',       label: 'Layers',             icon: '◈',
+  { id: 'layers',       label: 'Layers',           icon: Layers,
     subItems: [
       { label: 'All Layers',          navId: 'layers-all' },
       { label: 'Momentum',             navId: 'layers-momentum' },
@@ -28,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Macro',                navId: 'layers-macro' },
     ],
   },
-  { id: 'portfolio',    label: 'Portfolio',          icon: '💼',
+  { id: 'portfolio',    label: 'Portfolio',        icon: Briefcase,
     subItems: [
       { label: 'Overview',        navId: 'portfolio-overview' },
       { label: 'Holdings',        navId: 'portfolio-holdings' },
@@ -37,15 +42,15 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Risk Analysis',   navId: 'portfolio-risk' },
     ],
   },
-  { id: 'watchlist',    label: 'Watchlist',         icon: '⭐',
+  { id: 'watchlist',    label: 'Watchlist',        icon: Star,
     subItems: [
       { label: 'My Lists',       navId: 'watchlist-mylists' },
       { label: 'Shared Lists',  navId: 'watchlist-shared' },
       { label: 'Alerts',        navId: 'watchlist-alerts' },
     ],
   },
-  { id: 'news',         label: 'News',               icon: '📰' },
-  { id: 'alerts',       label: 'Alerts',             icon: '🔔',
+  { id: 'news',         label: 'News',             icon: Newspaper },
+  { id: 'alerts',       label: 'Alerts',           icon: Bell,
     subItems: [
       { label: 'Active Alerts',  navId: 'alerts-active' },
       { label: 'Triggered',     navId: 'alerts-triggered' },
@@ -53,7 +58,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Volume Alerts', navId: 'alerts-volume' },
     ],
   },
-  { id: 'reports',      label: 'Reports',            icon: '📋',
+  { id: 'reports',      label: 'Reports',          icon: ClipboardList,
     subItems: [
       { label: 'Performance',   navId: 'reports-performance' },
       { label: 'Portfolio',      navId: 'reports-portfolio' },
@@ -62,7 +67,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Scheduled',      navId: 'reports-scheduled' },
     ],
   },
-  { id: 'settings',     label: 'Settings',           icon: '⚙' },
+  { id: 'settings',     label: 'Settings',         icon: Settings },
 ];
 
 function SubMenuFlyout({ items, onNavigate, currentPage }: {
@@ -80,7 +85,7 @@ function SubMenuFlyout({ items, onNavigate, currentPage }: {
         return (
           <div key={item.navId} role="menuitem" onClick={() => onNavigate(item.navId)} style={{
             padding: '7px 14px',
-            fontSize: 11,                        // P2-3: 11px, text-secondary (4.7:1)
+            fontSize: 11,
             color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
             fontWeight: isActive ? 600 : 400,
             cursor: 'pointer', whiteSpace: 'nowrap',
@@ -107,15 +112,15 @@ function SubMenuAccordion({ items, onNavigate, currentPage }: {
         const isActive = currentPage === item.navId;
         return (
           <button key={item.navId} role="menuitem" onClick={() => onNavigate(item.navId)} style={{
-            padding: '8px 8px 8px 24px',   // P2-5: 44px min-height on mobile
-            fontSize: 11,                   // P2-3: 11px
+            padding: '8px 8px 8px 24px',   // 44px min-height on mobile
+            fontSize: 11,
             color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
             fontWeight: isActive ? 600 : 400,
             cursor: 'pointer', whiteSpace: 'nowrap',
             background: isActive ? 'rgba(0,229,200,0.08)' : 'transparent',
             border: 'none', borderRadius: 6, textAlign: 'left',
             fontFamily: 'var(--font-ui)',
-            minHeight: 44,                   // P2-5: 44px touch target on mobile
+            minHeight: 44,                   // 44px touch target on mobile
           }}>
             {item.label}
           </button>
@@ -145,13 +150,14 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
   }, [currentPage]);
 
   return (
-    // P0-3: root is <aside className="app-sidebar"> so .shell > aside rules apply:
+    // Root is <aside className="app-sidebar"> so .shell > aside rules apply:
     // ≥1024px full 208px sidebar · 768–1023px 64px icon rail (labels hidden) · <768px hidden (tab bar takes over)
     <aside ref={navRef} role="navigation" aria-label="Main navigation" className="app-sidebar">
       {NAV_ITEMS.map(item => {
         const hasSubs = !!item.subItems;
         const isParentActive = isUnderParent(currentPage, item.id);
         const isExpanded = expandedId === item.id;
+        const Icon = item.icon;
 
         return (
           <div key={item.id} style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -164,38 +170,46 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
                   onNavigate(item.id);
                 }
               }}
-              aria-label={item.label}         // P2-4: always accessible via aria-label
+              aria-label={item.label}
               aria-haspopup={hasSubs ? 'menu' : undefined}
               aria-expanded={hasSubs ? isExpanded : undefined}
-              title={item.label}               // P2-4: tooltip shows full label in icon-rail mode
+              title={item.label}               // tooltip shows full label in icon-rail mode
               style={{
-                width: 44,
-                // P2-5: 44px touch target on mobile; 40px desktop
-                minHeight: 44,
-                display: 'flex', flexDirection: 'column',
+                // Full-width horizontal row: icon + label read as one unit.
+                // justifyContent 'center' only has an effect in the 64px rail,
+                // where the label is display:none — so the icon self-centers.
+                width: '100%',
+                minHeight: 36,
+                display: 'flex', flexDirection: 'row',
                 alignItems: 'center', justifyContent: 'center',
+                padding: '7px 12px',
                 borderRadius: 8, cursor: 'pointer', border: 'none',
                 background: isParentActive ? 'rgba(0,229,200,0.1)' : 'transparent',
-                color: isParentActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',  // P2-3: text-secondary (4.7:1)
-                transition: 'all 120ms ease', gap: 2, position: 'relative',
+                color: isParentActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+                transition: 'all 120ms ease', position: 'relative',
               }}
             >
-              <span style={{ fontSize: 16, lineHeight: 1 }}>{item.icon}</span>
-              {/* P2-4: label always visible (no truncation), wrapping at 40px max-width */}
-              {/* P2-3: 11px (up from 8px), text-secondary for AA contrast */}
+              <Icon size={18} strokeWidth={1.8} style={{ flexShrink: 0 }} aria-hidden />
+              {/* flex:1 pushes the icon to the left edge at ≥1024px; in the rail
+                  this label is display:none (.app-sidebar .nav-label) and the
+                  button's justifyContent centers the icon instead. */}
               <span className="nav-label" style={{
-                fontSize: 11,                  // P2-3: was 8px → now 11px
-                color: isParentActive ? 'var(--accent-cyan)' : 'var(--text-secondary)', // P2-3: was text-muted → text-secondary
+                flex: 1,
+                marginLeft: 10,
+                fontSize: 12,
+                fontWeight: isParentActive ? 600 : 400,
                 lineHeight: 1.15,
-                maxWidth: 72,
-                // P2-4: wrap to two lines instead of truncating ("Market Overview")
-                overflow: 'visible',
-                whiteSpace: 'normal',
-                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                textAlign: 'left',
                 fontFamily: 'var(--font-ui)',
               }}>
                 {item.label}
               </span>
+              {/* Submenu affordance; hidden in rail mode by the same .nav-label rule */}
+              {hasSubs && (
+                <ChevronDown size={13} strokeWidth={1.8} className="nav-label" aria-hidden
+                  style={{ opacity: 0.5, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 120ms ease', flexShrink: 0 }} />
+              )}
               {isParentActive && (
                 <div style={{
                   position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',

@@ -1,3 +1,4 @@
+import { LayoutGrid, Zap, Briefcase, Star, Menu, type LucideIcon } from 'lucide-react';
 import { type NavId, isUnderParent } from '../NavId';
 
 interface BottomNavProps {
@@ -5,33 +6,13 @@ interface BottomNavProps {
   onNavigate: (id: NavId) => void;
 }
 
-// SVG icons matching index.html spec exactly
-const NAV_ITEMS: { id: NavId; label: string; icon: string }[] = [
-  {
-    id: 'dashboard',
-    label: 'Home',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>',
-  },
-  {
-    id: 'signals',
-    label: 'Signals',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>',
-  },
-  {
-    id: 'portfolio',
-    label: 'Portfolio',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
-  },
-  {
-    id: 'watchlist',
-    label: 'Watchlist',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.3.9-4.5 4.3 1 6.2-5.5-3-5.5 3 1-6.2L3 9.5l6.3-.9z"/></svg>',
-  },
-  {
-    id: 'more',
-    label: 'More',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
-  },
+// Minimalist monotone icons (lucide-react) — currentColor, 1.8 stroke
+const NAV_ITEMS: { id: NavId; label: string; icon: LucideIcon }[] = [
+  { id: 'dashboard', label: 'Home',      icon: LayoutGrid },
+  { id: 'signals',   label: 'Signals',   icon: Zap },
+  { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
+  { id: 'watchlist', label: 'Watchlist', icon: Star },
+  { id: 'more',      label: 'More',      icon: Menu },
 ];
 
 export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
@@ -52,6 +33,7 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
     >
       {NAV_ITEMS.map((item) => {
         const isActive = currentPage === item.id || isUnderParent(currentPage, item.id);
+        const Icon = item.icon;
         return (
           <button
             key={item.id}
@@ -65,16 +47,13 @@ export function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
               border: 'none',
               cursor: item.id === 'more' ? 'default' : 'pointer',
               padding: '6px 0',
-              minHeight: 48,
+              minHeight: 48,   // 48px touch target — the mobile-primary nav
               color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
               transition: 'color 0.12s',
             }}
             aria-label={item.label}
           >
-            <span
-              style={{ width: 20, height: 20, display: 'grid', placeItems: 'center' }}
-              dangerouslySetInnerHTML={{ __html: item.icon }}
-            />
+            <Icon size={20} strokeWidth={1.8} aria-hidden />
             <span style={{ fontSize: 10.5, fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font-ui)' }}>
               {item.label}
             </span>
