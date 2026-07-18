@@ -145,14 +145,9 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
   }, [currentPage]);
 
   return (
-    // P2-4: sidebar hidden at <768px (bottom nav takes over); icon-only at 64px
-    <nav ref={navRef} role="navigation" aria-label="Main navigation" style={{
-      width: 208,
-      background: 'var(--bg-surface)',
-      borderRight: '1px solid var(--border-default)',
-      display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-      padding: '14px 10px', gap: 2, flexShrink: 0, zIndex: 100, position: 'relative',
-    }}>
+    // P0-3: root is <aside className="app-sidebar"> so .shell > aside rules apply:
+    // ≥1024px full 208px sidebar · 768–1023px 64px icon rail (labels hidden) · <768px hidden (tab bar takes over)
+    <aside ref={navRef} role="navigation" aria-label="Main navigation" className="app-sidebar">
       {NAV_ITEMS.map(item => {
         const hasSubs = !!item.subItems;
         const isParentActive = isUnderParent(currentPage, item.id);
@@ -188,14 +183,14 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
               <span style={{ fontSize: 16, lineHeight: 1 }}>{item.icon}</span>
               {/* P2-4: label always visible (no truncation), wrapping at 40px max-width */}
               {/* P2-3: 11px (up from 8px), text-secondary for AA contrast */}
-              <span style={{
+              <span className="nav-label" style={{
                 fontSize: 11,                  // P2-3: was 8px → now 11px
                 color: isParentActive ? 'var(--accent-cyan)' : 'var(--text-secondary)', // P2-3: was text-muted → text-secondary
-                lineHeight: 1.2,
-                maxWidth: 60,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                lineHeight: 1.15,
+                maxWidth: 72,
+                // P2-4: wrap to two lines instead of truncating ("Market Overview")
+                overflow: 'visible',
+                whiteSpace: 'normal',
                 textAlign: 'center',
                 fontFamily: 'var(--font-ui)',
               }}>
@@ -225,6 +220,6 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
           </div>
         );
       })}
-    </nav>
+    </aside>
   );
 }
