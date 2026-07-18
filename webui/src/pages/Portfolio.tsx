@@ -147,7 +147,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
   const renderOverview = () => (
     <>
       {/* Summary cards */}
-      <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+      <div className="card p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div className="flex items-center gap-2 mb-1"><Briefcase className="w-4 h-4 text-primary-400" /><span className="text-slate-400 text-sm">Total Value</span></div>
@@ -172,25 +172,25 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
 
       {/* Holdings table */}
       {performance && (
-        <div className="bg-dark-900 border border-slate-800 rounded-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-800">
-            <h2 className="text-lg font-semibold text-white">Holdings <span className="text-slate-500 text-sm font-normal">— {performance.summary.holding_count} positions · live Yahoo Finance prices</span></h2>
+        <div className="card overflow-hidden">
+          <div className="card-header">
+            <h2 className="card-title">Holdings <span className="text-slate-500 text-sm font-normal">— {performance.summary.holding_count} positions · live Yahoo Finance prices</span></h2>
           </div>
           {performance.holdings.length === 0 ? (
             <div className="p-12 text-center text-slate-500">No holdings yet — add signals from the Signals page.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-dark-800 text-slate-400"><tr>
+                <thead className="bg-inset text-slate-400"><tr>
                   <th className="text-left px-6 py-3 font-medium">Symbol</th><th className="text-left px-6 py-3 font-medium">Sector</th>
                   <th className="text-right px-6 py-3 font-medium">Qty</th><th className="text-right px-6 py-3 font-medium">Avg Cost</th>
                   <th className="text-right px-6 py-3 font-medium">Price</th><th className="text-right px-6 py-3 font-medium">Value</th>
                   <th className="text-right px-6 py-3 font-medium">P&L</th><th className="text-right px-6 py-3 font-medium">P&L %</th>
                   <th className="text-left px-6 py-3 font-medium">Strategy</th><th className="text-left px-6 py-3 font-medium">Entry</th>
                 </tr></thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-token">
                   {performance.holdings.map(h => (
-                    <tr key={h.symbol} className="hover:bg-dark-800/50 transition-colors">
+                    <tr key={h.symbol} className="hover-bg-token transition-colors">
                       <td className="px-6 py-4 font-semibold text-white">{h.symbol}</td>
                       <td className="px-6 py-4 text-slate-400">{h.sector || '—'}</td>
                       <td className="px-6 py-4 text-right text-slate-300">{h.qty}</td>
@@ -213,18 +213,18 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
       {/* Sector + Winners/Losers + Drift Gauge */}
       {performance && performance.holdings.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Sector Allocation</h2>
             <div className="space-y-3">
               {performance.sector_allocation.map(s => (
                 <div key={s.sector}>
                   <div className="flex justify-between text-sm mb-1"><span className="text-slate-300">{s.sector}</span><span className="text-slate-400">${s.value.toLocaleString('en-US', { minimumFractionDigits: 0 })} ({s.pct}%)</span></div>
-                  <div className="h-2 bg-dark-800 rounded-full overflow-hidden"><div className="h-full bg-primary-500 rounded-full" style={{ width: `${s.pct}%` }} /></div>
+                  <div className="h-2 bg-inset rounded-full overflow-hidden"><div className="h-full bg-primary-500 rounded-full" style={{ width: `${s.pct}%` }} /></div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Top Winners</h2>
             {performance.top_winners.length === 0 ? <p className="text-slate-500 text-sm">No winners yet</p> : (
               <div className="space-y-3">
@@ -237,7 +237,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
               </div>
             )}
           </div>
-          <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+          <div className="card p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Top Losers</h2>
             {performance.top_losers.length === 0 ? <p className="text-slate-500 text-sm">No losers</p> : (
               <div className="space-y-3">
@@ -261,9 +261,9 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
   );
 
   const renderHoldings = () => (
-    <div className="bg-dark-900 border border-slate-800 rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Holdings Detail</h2>
+    <div className="card overflow-hidden">
+      <div className="card-header flex items-center justify-between">
+        <h2 className="card-title">Holdings Detail</h2>
         <span className="text-slate-500 text-sm">{performance?.summary.holding_count ?? 0} positions</span>
       </div>
       {performance?.holdings.length === 0 ? (
@@ -271,16 +271,16 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
       ) : performance ? (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-dark-800 text-slate-400"><tr>
+            <thead className="bg-inset text-slate-400"><tr>
               <th className="text-left px-6 py-3 font-medium">Symbol</th><th className="text-left px-6 py-3 font-medium">Sector</th>
               <th className="text-right px-6 py-3 font-medium">Qty</th><th className="text-right px-6 py-3 font-medium">Avg Cost</th>
               <th className="text-right px-6 py-3 font-medium">Price</th><th className="text-right px-6 py-3 font-medium">Value</th>
               <th className="text-right px-6 py-3 font-medium">P&L</th><th className="text-right px-6 py-3 font-medium">P&L %</th>
               <th className="text-left px-6 py-3 font-medium">Strategy</th><th className="text-left px-6 py-3 font-medium">Entry</th>
             </tr></thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-token">
               {performance.holdings.map(h => (
-                <tr key={h.symbol} className="hover:bg-dark-800/50 transition-colors">
+                <tr key={h.symbol} className="hover-bg-token transition-colors">
                   <td className="px-6 py-4 font-semibold text-white">{h.symbol}</td>
                   <td className="px-6 py-4 text-slate-400">{h.sector || '—'}</td>
                   <td className="px-6 py-4 text-right text-slate-300">{h.qty}</td>
@@ -312,7 +312,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold text-white">Portfolio</h1>
           <select value={selectedId || ''} onChange={e => setSelectedId(e.target.value)}
-            className="px-3 py-1.5 bg-dark-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500">
+            className="px-3 py-1.5 bg-inset border border-token rounded-lg text-white text-sm focus:outline-none focus:border-primary-500">
             {portfolios.map(p => <option key={p.id} value={p.id}>{p.name || 'Unnamed Portfolio'}</option>)}
           </select>
         </div>
@@ -324,7 +324,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
                 <Trash2 className="w-4 h-4" />
               </button>
               <button onClick={() => startEdit(portfolios.find(p => p.id === selectedId)!)}
-                className="p-2 text-slate-400 hover:text-white hover:bg-dark-800 rounded-lg transition-colors" title="Rename portfolio">
+                className="p-2 text-slate-400 hover:text-white hover-bg-token rounded-lg transition-colors" title="Rename portfolio">
                 <Edit2 className="w-4 h-4" />
               </button>
             </>
@@ -334,7 +334,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
             <Plus className="w-4 h-4" /> New Portfolio
           </button>
           <button onClick={() => selectedId && loadPerformance(selectedId)} disabled={perfLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-dark-800 hover:bg-dark-700 text-slate-300 rounded-lg transition-colors text-sm">
+            className="flex items-center gap-2 px-4 py-2 bg-inset hover-bg-token text-slate-300 rounded-lg transition-colors text-sm">
             <RefreshCw className={`w-4 h-4 ${perfLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
@@ -342,7 +342,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
 
       {/* Tab bar */}
       {portfolios.length > 0 && (
-        <div className="flex items-center gap-1 border-b border-slate-800">
+        <div className="flex items-center gap-1 border-b border-token">
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -353,7 +353,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
                   isActive
                     ? 'text-accent-cyan border-accent-cyan'
-                    : 'text-slate-400 border-transparent hover:text-slate-200 hover:border-slate-600'
+                    : 'text-slate-400 border-transparent hover:text-slate-200 hover:border-strong'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -366,38 +366,38 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
 
       {/* New portfolio form */}
       {showNew && (
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 space-y-4">
-          <h3 className="text-white font-semibold">Create New Portfolio</h3>
+        <div className="card p-6 space-y-4">
+          <h3 className="card-title">Create New Portfolio</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Portfolio name"
-              className="flex-1 px-4 py-2 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
+              className="flex-1 px-4 py-2 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
             <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Description (optional)"
-              className="flex-1 px-4 py-2 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
+              className="flex-1 px-4 py-2 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500" />
             <button onClick={handleCreate} disabled={createLoading}
               className="px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
               {createLoading ? 'Creating...' : 'Create'}
             </button>
             <button onClick={() => { setShowNew(false); setNewName(''); setNewDesc(''); }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-dark-800 rounded-lg"><X className="w-5 h-5" /></button>
+              className="p-2 text-slate-400 hover:text-white hover-bg-token rounded-lg"><X className="w-5 h-5" /></button>
           </div>
         </div>
       )}
 
       {/* Edit portfolio form */}
       {editingId && (
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 space-y-4">
-          <h3 className="text-white font-semibold">Rename Portfolio</h3>
+        <div className="card p-6 space-y-4">
+          <h3 className="card-title">Rename Portfolio</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <input value={editName} onChange={e => setEditName(e.target.value)}
-              className="flex-1 px-4 py-2 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500" />
+              className="flex-1 px-4 py-2 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500" />
             <input value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Description (optional)"
-              className="flex-1 px-4 py-2 bg-dark-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary-500" />
+              className="flex-1 px-4 py-2 bg-inset border border-token rounded-lg text-white focus:outline-none focus:border-primary-500" />
             <button onClick={() => handleSaveEdit(editingId)}
               className="px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
               <Check className="w-4 h-4" /> Save
             </button>
             <button onClick={() => setEditingId(null)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-dark-800 rounded-lg"><X className="w-5 h-5" /></button>
+              className="p-2 text-slate-400 hover:text-white hover-bg-token rounded-lg"><X className="w-5 h-5" /></button>
           </div>
         </div>
       )}
@@ -412,7 +412,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
             Delete
           </button>
           <button onClick={() => setDeleteConfirm(null)}
-            className="px-4 py-1.5 bg-dark-800 hover:bg-dark-700 text-slate-300 rounded-lg text-sm transition-colors">
+            className="px-4 py-1.5 bg-inset hover-bg-token text-slate-300 rounded-lg text-sm transition-colors">
             Cancel
           </button>
         </div>
@@ -425,7 +425,7 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
       )}
 
       {portfolios.length === 0 ? (
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-12 text-center">
+        <div className="card p-12 text-center items-center">
           <Briefcase className="w-12 h-12 text-slate-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">No portfolios yet</h2>
           <p className="text-slate-400 mb-4 max-w-md mx-auto">Generate signals on the Signals page, then use "Add to Portfolio" to create your first portfolio.</p>
