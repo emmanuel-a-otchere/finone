@@ -1,5 +1,5 @@
 // RadarChart — spec: hexagon, vertices: Trend/Momentum/MTF/Institutional/Sentiment/Intermarket, hover shows values
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, Tooltip,
