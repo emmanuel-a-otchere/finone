@@ -7,9 +7,11 @@ import { Dashboard } from './pages/Dashboard';
 import { Markets } from './pages/Markets';
 import { News } from './pages/News';
 import { Portfolio } from './pages/Portfolio';
+import type { PortfolioTab } from './pages/Portfolio';
 import { Settings } from './pages/Settings';
 import { Signals } from './pages/Signals';
 import { Layers } from './pages/Layers';
+import type { LayersProps } from './pages/Layers';
 import ScreenerPage from './pages/Screener';
 import WatchlistPage from './pages/Watchlist';
 import AlertsPage from './pages/Alerts';
@@ -85,7 +87,8 @@ type TabKey =
   | 'active' | 'triggered' | 'price' | 'volume'
   | 'performance' | 'portfolioRep' | 'marketRep' | 'custom' | 'scheduled';
 
-const SUB_PAGE_TABS: Record<NavId, { parent: NavId; tab: TabKey } | undefined> = {
+// Only sub-page NavIds have entries — hence Partial (main pages look up to undefined)
+const SUB_PAGE_TABS: Partial<Record<NavId, { parent: NavId; tab: TabKey }>> = {
   // Portfolio
   'portfolio-overview': { parent: 'portfolio', tab: 'overview' },
   'portfolio-holdings': { parent: 'portfolio', tab: 'holdings' },
@@ -204,7 +207,9 @@ export default function App() {
       case 'layers-meanreversion':
       case 'layers-optionsflow':
       case 'layers-macro':
-        return <Layers preselectLayer={subRoute?.tab ?? 'all'} />;
+        // The switch guarantees currentPage is a layers-*, so subRoute.tab is a
+        // layers tab — the shared TabKey union just can't express that narrowing.
+        return <Layers preselectLayer={(subRoute?.tab ?? 'all') as LayersProps['preselectLayer']} />;
 
       /* ---- Portfolio ---- */
       case 'portfolio':
@@ -213,7 +218,8 @@ export default function App() {
       case 'portfolio-transactions':
       case 'portfolio-pnl':
       case 'portfolio-risk':
-        return <Portfolio activeTab={subRoute?.tab ?? 'overview'} />;
+        // Same narrowing guarantee: only portfolio tabs reach this branch.
+        return <Portfolio activeTab={(subRoute?.tab ?? 'overview') as PortfolioTab} />;
 
       /* ---- Watchlist (placeholder) ---- */
       case 'watchlist':
@@ -258,4 +264,3 @@ export default function App() {
     </Layout>
   );
 }
-

@@ -9,7 +9,7 @@ interface Layer {
   description: string;
 }
 
-interface LayersProps {
+export interface LayersProps {
   preselectLayer?: 'all' | 'momentum' | 'meanreversion' | 'optionsflow' | 'macro';
 }
 
@@ -192,4 +192,3 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
     </div>
   );
 }
-

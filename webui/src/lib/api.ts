@@ -119,8 +119,14 @@ export interface StrategyConfig {
 import type { Signal, EventRiskScore, Recalibration } from '../types';
 
 class ApiClient {
+  // Token is set via setToken() after login/logout (see useAuth) and seeded
+  // from the persisted zustand auth store on page load. getHeaders() prefers
+  // this field and falls back to the persisted store.
   private token: string | null = (() => {
-    try { return JSON.parse(localStorage.getItem("systemone-auth") || "{}").token ?? null; }
+    try {
+      const persisted = JSON.parse(localStorage.getItem("systemone-auth") || "{}");
+      return persisted?.state?.token ?? persisted?.token ?? null;
+    }
     catch { return null; }
   })();
 
@@ -130,11 +136,22 @@ class ApiClient {
 
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = { "Content-Type": "application/json" };
-    try {
-      const auth = JSON.parse(localStorage.getItem('systemone-auth') || '{}');
-      if (auth.state.token) headers["Authorization"] = `Bearer ${auth.state.token}`;
-    } catch {}
+    let token = this.token;
+    if (!token) {
+      try {
+        const auth = JSON.parse(localStorage.getItem('systemone-auth') || '{}');
+        token = auth?.state?.token ?? null;
+      } catch { /* ignore */ }
+    }
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     return headers;
+  }
+
+  // Generic GET helper (auth headers + error handling)
+  private async get<T>(url: string): Promise<T> {
+    const response = await fetch(url, { headers: this.getHeaders() });
+    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+    return response.json() as Promise<T>;
   }
 
   // ---- Auth ----
@@ -461,7 +478,12 @@ class ApiClient {
     return response.json();
   }
 
-  async getPositions(status?: "OPEN" | "CLOSED"): Promise<any[]> {
+  // Backend (services/core-engine/app/api/positions.py) returns:
+  //   ?status=OPEN|CLOSED -> array of positions
+  //   (no status)         -> { open: Position[], closed: Position[] }
+  async getPositions(status: "OPEN" | "CLOSED"): Promise<any[]>;
+  async getPositions(): Promise<{ open: any[]; closed: any[] }>;
+  async getPositions(status?: "OPEN" | "CLOSED"): Promise<any> {
     const url = `${API_BASE}/positions/${status ? `?status=${status}` : ""}`;
     const response = await fetch(url, { headers: this.getHeaders() });
     if (!response.ok) throw new Error("Positions fetch failed");
@@ -582,4 +604,3 @@ class ApiClient {
 }
 
 export const api = new ApiClient();
-
