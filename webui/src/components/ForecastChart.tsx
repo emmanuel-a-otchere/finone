@@ -109,7 +109,7 @@ export function ForecastChart({ symbol, token }: ForecastChartProps) {
     <div className="space-y-3">
       {/* Outlook banner */}
       {scenarioLast && (
-        <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-dark-800 border border-slate-700">
+        <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-inset border border-token">
           <span className="text-sm text-slate-400">30-Day Outlook:</span>
           <span className={`text-sm font-semibold ${
             outlook.includes("BULLISH") ? "text-emerald-400" :
@@ -124,7 +124,7 @@ export function ForecastChart({ symbol, token }: ForecastChartProps) {
       )}
 
       {/* Tab selector */}
-      <div className="flex gap-1 bg-dark-900 rounded-lg p-1">
+      <div className="flex gap-1 bg-inset rounded-lg p-1">
         {(["price", "rsi", "scenario"] as const).map((t) => (
           <button
             key={t}

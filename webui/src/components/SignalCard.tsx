@@ -140,7 +140,7 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
       </div>
 
       {/* ── Confidence bar ── */}
-      <div className="mx-4 h-1 bg-dark-800 rounded-full overflow-hidden">
+      <div className="mx-4 h-1 bg-inset rounded-full overflow-hidden">
         <div
           className={'h-full rounded-full transition-all ' + confidenceBg(signal.confidence_score)}
           style={{ width: (signal.confidence_score ?? 0) + '%' }}
@@ -148,7 +148,7 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
       </div>
 
       {/* ── Trade levels ── */}
-      <div className="grid grid-cols-3 gap-px bg-dark-900 mx-4 my-3 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-3 gap-px bg-base mx-4 my-3 rounded-lg overflow-hidden">
         {[
           { label: 'ENTRY',  value: signal.entry_price,    color: 'text-primary' },
           { label: 'STOP',   value: signal.stop_loss,       color: 'text-red-400' },
@@ -185,7 +185,7 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
       )}
 
       {/* ── Footer: metrics + 6 layer bars ── */}
-      <div className="border-t border-dark-900 px-4 py-2.5">
+      <div className="border-t border-token px-4 py-2.5">
         <div className="flex items-center justify-between gap-3 text-xs">
           {/* LEFT: metrics */}
           <div className="flex items-center gap-3 text-slate-500">
@@ -233,12 +233,12 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
               const pct   = Math.round(score);
               const strong = pct >= 70;
               const weak   = pct < 40;
-              const label  = key.replace(/_/g, ' ').replace(/\w/g, (c: string) => c.toUpperCase());
+              const label  = key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
               const barColor = strong ? 'bg-emerald-500' : weak ? 'bg-red-500' : 'bg-amber-500';
               return (
                 <div key={key} className="flex items-center gap-2">
                   <span className="text-xs text-slate-500 font-mono w-28 truncate">{label}</span>
-                  <div className="w-14 h-1 bg-dark-700 rounded-full overflow-hidden">
+                  <div className="w-14 h-1 bg-inset rounded-full overflow-hidden">
                     <div className={'h-full rounded-full ' + barColor} style={{ width: pct + '%' }} />
                   </div>
                   <span className="text-xs text-slate-400 font-mono w-7">{pct}</span>
