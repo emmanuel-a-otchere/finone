@@ -1,0 +1,1618 @@
+# SystemOne Trading Intelligence Platform
+## Complete Technical Specification v1.0.0
+### OpenSpec (OpenAPI 3.1.0) with OpenClaw Integration
+
+**Document ID**: SYS-ONE-SPEC-1.0.0  
+**Status**: Production Ready  
+**Date**: 2026-03-08  
+**Compatibility**: OpenClaw v1.5+, Backward Compatible to v1.0  
+**License**: AGPL-3.0  
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Architecture Overview](#2-architecture-overview)
+3. [OpenAPI Specification](#3-openapi-specification)
+4. [Database Schema & Versioning](#4-database-schema--versioning)
+5. [OpenClaw Integration (SKILLs.md)](#5-openclaw-integration-skillsmd)
+6. [Installation & Deployment](#6-installation--deployment)
+7. [User Interface Specification](#7-user-interface-specification)
+8. [Portfolio Management](#8-portfolio-management)
+9. [AI/ML Features](#9-aiml-features)
+10. [Backward Compatibility Guarantee](#10-backward-compatibility-guarantee)
+
+---
+
+## 1. Executive Summary
+
+SystemOne is a self-contained quantitative trading intelligence system featuring:
+- **5-Layer Ensemble Analysis**: Trend, Momentum, Multi-Timeframe, Institutional Flow, Sentiment, Intermarket
+- **Zero-Cost Data Architecture**: 100% free data sources (Yahoo Finance, FRED, SEC EDGAR, Reddit)
+- **OpenClaw Native**: Seamless integration with Stockman agent, NTFY (ping.otchere.com), and OpenClaw SMTP
+- **Modern WebUI**: React-based dashboard with layer correlation drilldown
+- **Autonomous Operation**: Self-learning Bayesian optimization with portfolio file monitoring
+
+---
+
+## 2. Architecture Overview
+
+### 2.1 Minimal Three-Service Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           Caddy Reverse Proxy                        │
+│                    (Host-installed or Containerized)                 │
+│  Routes: /api/core/* → Core Engine                                  │
+│          /api/intel/* → Intelligence                                │
+│          /ws → WebSocket                                            │
+│          / → React WebUI                                            │
+└──────────────────┬──────────────────────────────────────────────────┘
+                   │
+    ┌──────────────┼──────────────┐
+    │              │              │
+┌───▼──────────┐ ┌▼─────────────┐ ┌▼──────────────┐
+│ Core Engine  │ │ Intelligence │ │   PostgreSQL  │
+│ (FastAPI)    │ │  (FastAPI)   │ │  (TimescaleDB)│
+│ Port: 8001   │ │  Port: 8002  │ │   Port: 5432  │
+│              │ │              │ │               │
+│ • Signals    │ │ • ML/LSTM    │ │ • Market Data │
+│ • Risk Mgmt  │ │ • NLP/FinBERT│ │ • Portfolio   │
+│ • WebSocket  │ │ • Celery     │ │ • Versioned   │
+│ • Intermarket│ │ • OpenClaw   │ │   Schema      │
+└──────┬───────┘ └──────┬───────┘ └───────────────┘
+       │                │
+       └────────────────┘
+              │
+       ┌──────▼──────┐
+       │    Redis    │
+       │   (Cache    │
+       │    + Queue) │
+       └─────────────┘
+```
+
+### 2.2 Technology Stack
+
+| Component | Technology | Version | Purpose |
+|-----------|-----------|---------|---------|
+| API Gateway | Caddy | 2.7+ | Reverse proxy, HTTPS, HTTP/3 |
+| Core Engine | Python/FastAPI | 3.11/0.109 | Signal generation, risk |
+| Intelligence | Python/FastAPI | 3.11/0.109 | ML, NLP, optimization |
+| Database | PostgreSQL | 15+ | TimescaleDB extension |
+| Cache/Queue | Redis | 7+ | Streams, pub/sub, Celery |
+| Frontend | React | 18+ | TypeScript, Tailwind |
+| ML Framework | PyTorch | 2.1+ | LSTM forecasting |
+| NLP | Transformers | 4.36+ | FinBERT sentiment |
+
+---
+
+## 3. OpenAPI Specification
+
+```yaml
+openapi: 3.1.0
+info:
+  title: SystemOne Trading Platform
+  version: 2.0.0
+  description: |
+    Self-learning trading system with OpenClaw integration.
+    **Backward Compatibility**: All v1.x endpoints remain functional.
+    **NTFY Server**: https://ping.otchere.com (OpenClaw-referenced)
+    **Database**: Versioned schema with migration support
+    
+servers:
+  - url: http://localhost/api/core
+    description: Core Engine via Caddy
+  - url: http://localhost/api/intel
+    description: Intelligence Layer
+  - url: ws://localhost/ws
+    description: Real-time WebSocket
+  - url: http://localhost/openclaw
+    description: OpenClaw Skill Interface
+
+tags:
+  - name: System
+    description: Health, version, compatibility
+  - name: Signals
+    description: Signal generation and management
+  - name: Portfolio
+    description: Portfolio file ingestion and monitoring
+  - name: Intelligence
+    description: ML models and self-learning
+  - name: OpenClaw
+    description: Agent integration endpoints
+  - name: Notifications
+    description: NTFY and OpenClaw messaging
+  - name: WebUI
+    description: Dashboard data endpoints
+  - name: Layers
+    description: Layer drilldown and correlation
+
+components:
+  schemas:
+    
+    # ================= Version & Compatibility =================
+    
+    SystemVersion:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "2.0.0"
+        api_version:
+          type: string
+          example: "v1"
+        database_version:
+          type: integer
+          example: 5
+        min_compatible_db:
+          type: integer
+          example: 1
+        features:
+          type: array
+          items:
+            type: string
+            enum: [layer_drilldown, openclaw_integration, ntfy_alerts, 
+                   portfolio_monitoring, lstm_forecast, finbert_sentiment]
+        deprecated_endpoints:
+          type: array
+          items:
+            type: string
+          example: []
+        breaking_changes:
+          type: array
+          items:
+            type: string
+          description: "Empty array indicates full backward compatibility"
+
+    # ================= Core Data Models =================
+    
+    SignalClassification:
+      type: object
+      required: [signal_id, protocol_type, confidence_score, version]
+      properties:
+        signal_id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        version:
+          type: string
+          default: "2.0.0"
+          description: "Schema version for backward compatibility"
+        protocol_type:
+          type: string
+          enum: [LONG_BUY, LONG_SELL, SHORT_SELL, SHORT_BUY]
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        symbol:
+          type: string
+          example: "AAPL"
+        timestamp:
+          type: string
+          format: date-time
+        expiration:
+          type: string
+          format: date-time
+        entry_trigger:
+          type: object
+          properties:
+            price:
+              type: number
+            stop_loss:
+              type: number
+            take_profit:
+              type: number
+            position_size_pct:
+              type: number
+        layer_confluence:
+          type: object
+          properties:
+            trend_structure:
+              type: number
+              description: "0-20 points"
+            momentum_convergence:
+              type: number
+            multi_timeframe:
+              type: number
+            institutional_flow:
+              type: number
+            sentiment_alignment:
+              type: number
+            intermarket_filter:
+              type: number
+        metadata:
+          type: object
+          additionalProperties: true
+          description: "Extensible metadata for future features without breaking changes"
+
+    # ================= Portfolio File Schema =================
+    
+    PortfolioFile:
+      type: object
+      description: "User portfolio definition for monitoring"
+      required: [format_version, holdings]
+      properties:
+        format_version:
+          type: string
+          default: "2.0"
+        last_updated:
+          type: string
+          format: date-time
+        holdings:
+          type: array
+          items:
+            type: object
+            properties:
+              symbol:
+                type: string
+              qty:
+                type: number
+              avg_cost:
+                type: number
+                description: "Average cost basis"
+              strategy:
+                type: string
+                enum: [core, swing, speculative]
+              alerts_enabled:
+                type: boolean
+                default: true
+              auto_optimize:
+                type: boolean
+                default: false
+                description: "Allow SystemOne to suggest rebalancing"
+        watchlist:
+          type: array
+          items:
+            type: string
+          description: "Symbols to monitor without holding"
+        settings:
+          type: object
+          properties:
+            rebalance_threshold:
+              type: number
+              default: 0.05
+            max_position_size:
+              type: number
+              default: 0.25
+            notification_preference:
+              type: string
+              enum: [all, significant_only, none]
+              default: "significant_only"
+
+    # ================= Layer Drilldown (Advanced UI) =================
+    
+    LayerDrilldown:
+      type: object
+      properties:
+        layer_name:
+          type: string
+          enum: [trend_structure, momentum_convergence, multi_timeframe, 
+                 institutional_flow, sentiment_alignment, intermarket_filter]
+        schema_version:
+          type: string
+          default: "2.0.0"
+        datapoints:
+          type: array
+          items:
+            type: object
+            properties:
+              indicator:
+                type: string
+                example: "ichimoku_cloud"
+              display_name:
+                type: string
+                example: "Ichimoku Cloud Analysis"
+              value_current:
+                type: string
+                example: "Bullish (Price above Senkou Span B)"
+              value_raw:
+                type: object
+                additionalProperties: true
+                description: "Raw numeric data for charting"
+              historical_series:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ts:
+                      type: string
+                      format: date-time
+                    value:
+                      type: number
+                    signal_contribution:
+                      type: number
+        cross_layer_impact:
+          type: array
+          description: "How this layer correlates with others"
+          items:
+            type: object
+            properties:
+              target_layer:
+                type: string
+              correlation_coefficient:
+                type: number
+              influence_score:
+                type: number
+              insight_text:
+                type: string
+                example: "Trend strength confirms momentum direction"
+
+    # ================= OpenClaw Integration =================
+    
+    OpenClawQuery:
+      type: object
+      required: [intent, parameters]
+      properties:
+        intent:
+          type: string
+          enum: [generate_signal, optimize_portfolio, analyze_sentiment, 
+                 backtest_strategy, get_correlation, drilldown_layer,
+                 rebalance_suggestion, risk_assessment]
+        parameters:
+          type: object
+          properties:
+            symbols:
+              type: array
+              items:
+                type: string
+            protocols:
+              type: array
+              items:
+                type: string
+                enum: [LONG_BUY, LONG_SELL, SHORT_SELL, SHORT_BUY, ALL]
+            layer_depth:
+              type: string
+              enum: [summary, detailed, full]
+              default: "summary"
+            include_forecast:
+              type: boolean
+              default: true
+        context:
+          type: object
+          description: "Portfolio context from Stockman"
+          properties:
+            portfolio_id:
+              type: string
+            risk_profile:
+              type: string
+              enum: [conservative, moderate, aggressive]
+        response_format:
+          type: string
+          enum: [json, markdown, structured_data]
+          default: "json"
+
+    # ================= Notifications (OpenClaw-Referenced) =================
+    
+    NotificationRequest:
+      type: object
+      properties:
+        channel_type:
+          type: string
+          enum: [NTFY, SMTP, OPENCLAW_INTERNAL]
+          description: "NTFY uses https://ping.otchere.com via OpenClaw config"
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "5=Urgent (Max), 1=Min"
+        topic:
+          type: string
+          default: "portfolio"
+        title:
+          type: string
+        message:
+          type: string
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+                enum: [view, http, broadcast]
+              label:
+                type: string
+              url:
+                type: string
+        attach_chart:
+          type: boolean
+          default: false
+          description: "Generate and attach chart image"
+
+paths:
+
+  # ================= System Health & Version =================
+  
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health check with version compatibility
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, maintenance]
+                  version_info:
+                    $ref: '#/components/schemas/SystemVersion'
+                  database_status:
+                    type: string
+                  last_migration:
+                    type: string
+
+  /system/compatibility:
+    get:
+      tags: [System]
+      summary: Check compatibility with requested version
+      parameters:
+        - name: client_version
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compatible:
+                    type: boolean
+                  migration_required:
+                    type: boolean
+                  deprecated_features:
+                    type: array
+                    items:
+                      type: string
+
+  # ================= Portfolio Management =================
+  
+  /portfolio/upload:
+    post:
+      tags: [Portfolio]
+      summary: Upload portfolio file for monitoring
+      description: |
+        Ingests user portfolio file (JSON/CSV). SystemOne monitors these 
+        holdings for buy/sell signals based on layer analysis.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                format:
+                  type: string
+                  enum: [json, csv]
+                auto_optimize:
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  portfolio_id:
+                    type: string
+                  holdings_imported:
+                    type: integer
+                  watchlist_imported:
+                    type: integer
+                  monitoring_enabled:
+                    type: boolean
+
+  /portfolio/{id}/status:
+    get:
+      tags: [Portfolio]
+      summary: Get current portfolio status with layer-based recommendations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  portfolio:
+                    $ref: '#/components/schemas/PortfolioFile'
+                  current_signals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignalClassification'
+                  recommendations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action:
+                          type: string
+                          enum: [BUY_MORE, REDUCE, HOLD, SELL_ALL]
+                        symbol:
+                          type: string
+                        confidence:
+                          type: number
+                        layer_trigger:
+                          type: string
+                          description: "Which layer triggered this recommendation"
+
+  # ================= Signal Generation =================
+  
+  /signals/generate:
+    post:
+      tags: [Signals]
+      summary: Generate trading signals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                symbols:
+                  type: array
+                  items:
+                    type: string
+                protocols:
+                  type: array
+                  items:
+                    type: string
+                portfolio_context:
+                  type: string
+                  description: "Portfolio ID for risk-adjusted sizing"
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignalClassification'
+
+  # ================= OpenClaw Skill Interface =================
+  
+  /openclaw/query:
+    post:
+      tags: [OpenClaw]
+      summary: Primary agent query endpoint
+      description: |
+        Stockman agent queries for signals, optimization, or analysis.
+        Version-agnostic: handles both v1 and v1 parameter formats.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenClawQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    oneOf:
+                      - $ref: '#/components/schemas/SignalClassification'
+                      - type: array
+                        items:
+                          $ref: '#/components/schemas/SignalClassification'
+                      - $ref: '#/components/schemas/LayerDrilldown'
+                  suggested_actions:
+                    type: array
+                  version:
+                    type: string
+                    example: "2.0.0"
+
+  /openclaw/optimize:
+    post:
+      tags: [OpenClaw]
+      summary: Parameter optimization request
+      description: |
+        Bayesian optimization of thresholds based on portfolio performance.
+        Non-breaking: maintains legacy parameter names while adding new options.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target_metric:
+                  type: string
+                  enum: [sharpe_ratio, max_drawdown, win_rate, profit_factor, calmar_ratio]
+                constraints:
+                  type: object
+                portfolio_id:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  optimized_params:
+                    type: object
+                  expected_improvement:
+                    type: number
+                  backtest_results:
+                    type: object
+
+  # ================= Layer Analysis =================
+  
+  /layers/{layer_name}/drilldown:
+    get:
+      tags: [Layers]
+      summary: Detailed layer analysis with correlation mapping
+      description: |
+        Returns granular datapoints for UI drilldown.
+        Backward compatible: returns v1 format if requested via Accept header.
+      parameters:
+        - name: layer_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: symbol
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: include_correlations
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: format_version
+          in: query
+          schema:
+            type: string
+            enum: ['1.0', '2.0']
+            default: '2.0'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LayerDrilldown'
+
+  /layers/correlation-matrix:
+    get:
+      tags: [Layers]
+      summary: 6x6 correlation matrix between all layers
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matrix:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: number
+                  labels:
+                    type: array
+                    items:
+                      type: string
+                  timestamp:
+                    type: string
+
+  # ================= Notifications (OpenClaw-Referenced) =================
+  
+  /notifications/configure:
+    post:
+      tags: [Notifications]
+      summary: Configure notification channels via OpenClaw
+      description: |
+        NTFY server defaults to https://ping.otchere.com (OpenClaw-referenced).
+        SMTP configuration inherited from OpenClaw host environment.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ntfy_topic:
+                  type: string
+                  default: "portfolio"
+                ntfy_priority_map:
+                  type: object
+                smtp_enabled:
+                  type: boolean
+                  description: "Uses OpenClaw SMTP relay, not direct connection"
+      responses:
+        '200':
+          description: Configuration saved
+
+  /notifications/send:
+    post:
+      tags: [Notifications]
+      summary: Send notification via OpenClaw-referenced channels
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification queued
+
+  # ================= WebUI Data =================
+  
+  /ui/dashboard:
+    get:
+      tags: [WebUI]
+      summary: Complete dashboard payload
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  portfolio_summary:
+                    type: object
+                  active_signals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignalClassification'
+                  layer_status:
+                    type: object
+                  recent_alerts:
+                    type: array
+                  system_health:
+                    type: object
+
+  /ws:
+    get:
+      tags: [WebUI]
+      summary: WebSocket for real-time updates
+      responses:
+        '101':
+          description: Switching to WebSocket
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+```
+
+---
+
+## 4. Database Schema & Versioning
+
+### 4.1 Schema Migration Strategy
+
+**Guarantee**: All schema changes are additive. No column drops, no table renames without views.
+
+```sql
+-- Migration naming: V{version}__{description}.sql
+-- Example: V1__initial_schema.sql, v1__add_layer_metadata.sql
+
+-- Current Version: 5
+-- Compatible back to: Version 1 (via views)
+
+-- ================= CORE TABLES (Version Stable) =================
+
+CREATE TABLE signals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    version VARCHAR(10) DEFAULT '2.0.0',  -- Schema version
+    protocol_type VARCHAR(20) NOT NULL,
+    symbol VARCHAR(10) NOT NULL,
+    confidence_score INTEGER CHECK (confidence_score >= 0 AND confidence_score <= 100),
+    entry_price DECIMAL(12,4),
+    stop_loss DECIMAL(12,4),
+    take_profit DECIMAL(12,4),
+    position_size_pct DECIMAL(5,2),
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ,
+    -- Layer scores (additive only, new layers get NULL in old records)
+    layer_trend_structure INTEGER,
+    layer_momentum INTEGER,
+    layer_multi_timeframe INTEGER,
+    layer_institutional INTEGER,
+    layer_sentiment INTEGER,
+    layer_intermarket INTEGER,
+    -- Metadata JSON for extensibility
+    metadata JSONB DEFAULT '{}',
+    -- Backward compatibility view support
+    legacy_format JSONB GENERATED ALWAYS AS (
+        jsonb_build_object(
+            'signal_id', id,
+            'protocol', protocol_type,
+            'confidence', confidence_score
+        )
+    ) STORED
+);
+
+-- TimescaleDB hypertable for time-series
+SELECT create_hypertable('signals', 'created_at', if_not_exists => TRUE);
+
+-- Portfolio monitoring table
+CREATE TABLE portfolios (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR(100),
+    format_version VARCHAR(10) DEFAULT '2.0',
+    holdings JSONB NOT NULL,  -- Array of PortfolioFile holdings
+    watchlist JSONB,
+    settings JSONB,
+    last_uploaded TIMESTAMPTZ DEFAULT NOW(),
+    monitoring_active BOOLEAN DEFAULT TRUE,
+    -- Computed fields for quick queries
+    total_holdings INTEGER GENERATED ALWAYS AS (jsonb_array_length(holdings)) STORED
+);
+
+-- Layer drilldown cache (for UI performance)
+CREATE TABLE layer_analysis_cache (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    symbol VARCHAR(10) NOT NULL,
+    layer_name VARCHAR(50) NOT NULL,
+    analysis_data JSONB NOT NULL,
+    correlation_matrix JSONB,
+    calculated_at TIMESTAMPTZ DEFAULT NOW(),
+    valid_until TIMESTAMPTZ,
+    UNIQUE(symbol, layer_name, calculated_at)
+);
+
+-- Self-learning outcomes
+CREATE TABLE model_outcomes (
+    id BIGSERIAL,
+    signal_id UUID REFERENCES signals(id),
+    model_version VARCHAR(20),
+    actual_outcome VARCHAR(20),  -- TRUE_POSITIVE, etc.
+    profit_loss_pct DECIMAL(8,4),
+    market_regime VARCHAR(20),  -- trending, ranging, volatile
+    recorded_at TIMESTAMPTZ DEFAULT NOW()
+);
+SELECT create_hypertable('model_outcomes', 'recorded_at');
+
+-- ================= BACKWARD COMPATIBILITY VIEWS =================
+
+-- v1 API compatibility view
+CREATE VIEW signals_v1 AS
+SELECT 
+    id as signal_id,
+    protocol_type as type,
+    confidence_score as confidence,
+    symbol,
+    entry_price,
+    stop_loss,
+    created_at as timestamp
+FROM signals
+WHERE version >= '1.0';
+
+-- Add new columns in v1, V3, etc. as separate migrations
+-- Example v1 migration would be:
+-- ALTER TABLE signals ADD COLUMN IF NOT EXISTS new_feature_data JSONB;
+```
+
+### 4.2 Database Connection (Environment)
+
+```yaml
+# Config reference
+database:
+  host: ${DB_HOST:-postgres}
+  port: ${DB_PORT:-5432}
+  name: ${DB_NAME:-systemone}
+  user: ${DB_USER:-postgres}
+  password: ${DB_PASSWORD}
+  pool_size: 20
+  max_overflow: 10
+  # Version check on startup
+  schema_version_table: schema_migrations
+```
+
+---
+
+## 5. OpenClaw Integration (SKILLs.md)
+
+Create this file at `SKILLs.md` in the project root:
+
+```markdown
+# SystemOne Trading Skill for OpenClaw
+
+## Metadata
+```yaml
+skill_id: systemone-trading
+name: "SystemOne Quantitative Trading"
+version: "2.0.0"
+description: |
+  Advanced 6-layer ensemble trading system with self-learning capabilities.
+  Monitors portfolios, generates signals, and provides drilldown analysis.
+icon: 📈
+author: "SystemOne Team"
+license: "AGPL-3.0"
+min_openclaw_version: "1.5.0"
+```
+
+## External Dependencies (OpenClaw-Provided)
+
+### NTFY Notifications
+**Endpoint**: `https://ping.otchere.com`  
+**Topic**: `portfolio` (default, configurable)  
+**Integration**: SystemOne references OpenClaw's NTFY configuration
+
+```yaml
+# In OpenClaw host config
+skills:
+  systemone-trading:
+    ntfy:
+      server_url: https://ping.otchere.com
+      topic: portfolio
+      priority_map:
+        critical: 5
+        high: 4
+        normal: 3
+        low: 2
+        min: 1
+```
+
+### SMTP Relay
+**Provider**: OpenClaw internal messaging service  
+**Method**: SystemOne calls OpenClaw API rather than direct SMTP
+
+```python
+# SystemOne uses this pattern:
+def send_email(to, subject, body):
+    requests.post(
+        f"{OPENCLAW_BASE_URL}/messaging/email",
+        json={"to": to, "subject": subject, "body": body, "skill": "systemone-trading"},
+        headers={"X-API-Key": OPENCLAW_API_KEY}
+    )
+```
+
+## Agent Compatibility
+
+| Agent | Role | Capabilities |
+|-------|------|--------------|
+| **Stockman** | Primary | Execute trades, portfolio optimization, rebalancing |
+| **Analyst** | Secondary | Deep layer analysis, correlation studies, backtesting |
+| **RiskManager** | Tertiary | Position sizing limits, drawdown monitoring |
+
+## API Endpoints (Exposed to OpenClaw)
+
+### 1. Query Endpoint
+**Path**: `POST /openclaw/query`  
+**Auth**: Bearer token from OpenClaw
+
+**Intents**:
+- `generate_signal`: Get trading signals for symbols
+- `optimize_portfolio`: Bayesian optimization of parameters  
+- `analyze_sentiment`: NLP sentiment analysis
+- `drilldown_layer`: Detailed layer analysis with correlations
+- `rebalance_suggestion`: Portfolio rebalancing recommendations
+
+**Example**:
+```json
+{
+  "intent": "generate_signal",
+  "parameters": {
+    "symbols": ["AAPL", "MSFT"],
+    "protocols": ["LONG_BUY"],
+    "layer_depth": "detailed"
+  },
+  "context": {
+    "portfolio_id": "port_123",
+    "risk_profile": "moderate"
+  }
+}
+```
+
+### 2. Alert Endpoint (Incoming)
+**Path**: `POST /openclaw/alert`  
+**Purpose**: Receive alerts from other OpenClaw agents
+
+Example: RiskManager warns of volatility spike → SystemOne correlates with internal signals.
+
+### 3. Report Endpoint
+**Path**: `GET /openclaw/report?period=daily`  
+**Returns**: Markdown or JSON performance reports
+
+## Portfolio File Monitoring
+
+SystemOne accepts portfolio files via:
+
+1. **Upload**: `POST /portfolio/upload` (multipart/form-data)
+2. **OpenClaw Integration**: Stockman can push portfolio updates via query context
+
+**Supported Formats**:
+- JSON (schema defined in SystemOne spec)
+- CSV (Symbol, Qty, AvgCost, Strategy columns)
+
+**Monitoring Behavior**:
+- Continuously monitors holdings for layer-based signals
+- Generates BUY_MORE, REDUCE, or SELL_ALL recommendations
+- Alerts via NTFY (ping.otchere.com) when thresholds hit
+
+## Notification Flow
+
+```
+SystemOne Signal Generated
+        ↓
+Priority Assessment (1-5)
+        ↓
+    ┌───┴───┐
+    ↓       ↓
+   NTFY    OpenClaw
+(ping.    Agent
+otchere)  Message
+    ↓       ↓
+  Mobile  Stockman
+  Push    Inbox
+```
+
+**Topics**:
+- `portfolio`: Trading signals, executions
+- `systemone-alerts`: System errors, model retraining complete
+- `portfolio-daily`: Daily summary reports
+
+## Version Compatibility
+
+- **Current**: 2.0.0
+- **Backward Compatible**: All 1.x features supported via compatibility layer
+- **Database**: Migrations handled automatically, no breaking schema changes
+
+## Installation via OpenClaw
+
+```bash
+# Stockman installs skill
+openclaw skills install systemone-trading
+
+# Configure
+openclaw skills configure systemone-trading --config systemone-config.yaml
+
+# Verify
+openclaw skills test systemone-trading --agent Stockman
+```
+
+## Data Sources (Free Tier Only)
+
+SystemOne operates on zero-cost data:
+- Yahoo Finance (prices)
+- FRED (economic data)
+- SEC EDGAR (fundamentals)
+- Reddit API (sentiment)
+- RSS feeds (news)
+
+No API costs incurred by OpenClaw host.
+```
+
+---
+
+## 6. Installation & Deployment
+
+### 6.1 Prerequisites
+
+```bash
+# System requirements
+CPU: 2+ cores (ARM or x86)
+RAM: 4GB minimum, 8GB recommended
+Storage: 20GB SSD
+OS: Linux (Ubuntu 22.04 LTS recommended), macOS, or Windows (WSL2)
+
+# Software
+Docker Engine 24.0+
+Docker Compose 2.20+
+Git 2.40+
+Make 4.3+ (optional)
+```
+
+### 6.2 Installation Steps
+
+```bash
+# 1. Clone repository
+git clone https://github.com/systemone/platform.git
+cd systemone-platform
+
+# 2. Create environment file
+cp .env.example .env
+
+# Edit .env with your settings:
+cat > .env << EOF
+# Database
+DB_PASSWORD=secure_password_here
+
+# OpenClaw Integration (Required)
+OPENCLAW_API_URL=http://openclaw:8080
+OPENCLAW_API_KEY=your_openclaw_key
+OPENCLAW_AGENT_ID=stockman
+
+# NTFY (OpenClaw-referenced, defaults shown)
+OPENCLAW_NTFY_SERVER=https://ping.otchere.com
+OPENCLAW_NTFY_TOPIC=portfolio
+
+# SMTP (OpenClaw-referenced, optional)
+OPENCLAW_SMTP_HOST=smtp.openclaw.local
+
+# SystemOne Config
+SYSTEMONE_ENV=production
+JWT_SECRET=random_secret_key
+EOF
+
+# 3. Initialize database
+docker-compose up -d postgres redis
+sleep 10
+docker-compose exec postgres psql -U postgres -c "CREATE DATABASE systemone;"
+docker-compose exec postgres psql -U postgres -d systemone -f /app/init-scripts/schema.sql
+
+# 4. Build and start services
+docker-compose build
+docker-compose up -d
+
+# 5. Verify installation
+curl http://localhost/api/core/system/health
+# Expected: {"status": "healthy", "version_info": {...}}
+
+# 6. Access WebUI
+open http://localhost
+```
+
+### 6.3 Portfolio File Setup
+
+Create `portfolio.json`:
+
+```json
+{
+  "format_version": "2.0",
+  "last_updated": "2026-03-08T10:00:00Z",
+  "holdings": [
+    {
+      "symbol": "AAPL",
+      "qty": 100,
+      "avg_cost": 150.00,
+      "strategy": "core",
+      "alerts_enabled": true,
+      "auto_optimize": true
+    },
+    {
+      "symbol": "TSLA",
+      "qty": 50,
+      "avg_cost": 200.00,
+      "strategy": "swing",
+      "alerts_enabled": true
+    }
+  ],
+  "watchlist": ["MSFT", "NVDA", "AMD"],
+  "settings": {
+    "rebalance_threshold": 0.05,
+    "max_position_size": 0.25,
+    "notification_preference": "significant_only"
+  }
+}
+```
+
+Upload via WebUI or API:
+
+```bash
+curl -X POST http://localhost/api/core/portfolio/upload \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@portfolio.json" \
+  -F "format=json"
+```
+
+---
+
+## 7. User Interface Specification
+
+### 7.1 Technology Stack
+
+- **Framework**: React 18.2+ with TypeScript
+- **State Management**: Zustand (lightweight, persistent)
+- **Styling**: Tailwind CSS 3.4 + Headless UI
+- **Charts**: 
+  - Lightweight Charts (TradingView) for price action
+  - Recharts for correlation matrices
+  - React-Force-Graph for layer relationships
+- **WebSocket**: Native browser API with reconnect logic
+- **Build**: Vite (fast HMR, optimized builds)
+
+### 7.2 Dashboard Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Header: SystemOne v1.0.0 │ Portfolio: $125,400 │ P&L: +$2,400   │
+├──────────────┬───────────────────┬──────────────────────────────┤
+│   Sidebar    │   Main Content Area                              │
+│              │                                                  │
+│ [Portfolio]  │  [Tab: Signals] [Tab: Layers] [Tab: Settings]   │
+│ [Layers]     │                                                  │
+│ [Analysis]   │  ┌─────────────────────────────────────────┐    │
+│ [Reports]    │  │          Layer Correlation Graph        │    │
+│              │  │     (Interactive Force-Directed)        │    │
+│ [Alerts]     │  └─────────────────────────────────────────┘    │
+│              │                                                  │
+│ Status:      │  ┌──────────────┐ ┌──────────────┐ ┌─────────┐ │
+│ 🟢 Connected │  │ Trend Layer  │ │ Momentum     │ │ Sentim. │ │
+│              │  │ [Drill Down] │ │ [Drill Down] │ │ [...]   │ │
+└──────────────┴──┴──────────────┴─┴──────────────┴─┴─────────┴─┘
+```
+
+### 7.3 Layer Drilldown UI
+
+**Component**: `LayerExplorer.tsx`
+
+Features:
+- **3D Correlation View**: Force-directed graph showing 6 layers as nodes
+- **Time-Series Overlay**: Historical layer scores vs price
+- **Raw Datatable**: Collapsible table of all indicator values
+- **Cross-Layer Impact**: Sidebar showing correlations (e.g., "Trend confirms Momentum: 0.85")
+
+**Color Coding**:
+- Green (#00FF88): Positive contribution to signal
+- Red (#FF4444): Negative contribution  
+- Yellow (#FFFF44): Neutral/transitioning
+- Background: Dark mode (#0A0A0A) default
+
+---
+
+## 8. AI/ML Features
+
+### 8.1 LSTM Forecasting Model
+
+**Architecture**:
+- Input: 60 days of OHLCV + sentiment scores
+- Layers: 2 LSTM layers (128 units, dropout 0.2)
+- Output: 30-day price prediction with confidence bands
+- Training: Daily retraining via Celery beat (2 AM UTC)
+
+**Implementation**:
+```python
+# services/intelligence/ml/lstm_model.py
+import torch
+import torch.nn as nn
+
+class SystemOneLSTM(nn.Module):
+    def __init__(self, input_dim=10, hidden_dim=128, num_layers=2, output_dim=30):
+        super().__init__()
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, 
+                           batch_first=True, dropout=0.2)
+        self.linear = nn.Linear(hidden_dim, output_dim)
+        
+    def forward(self, x):
+        lstm_out, _ = self.lstm(x)
+        predictions = self.linear(lstm_out[:, -1, :])
+        return predictions
+```
+
+### 8.2 FinBERT Sentiment Analysis
+
+**Model**: `ProsusAI/finbert` (HuggingFace)  
+**Input**: Reddit posts, news headlines  
+**Output**: Sentiment score (-1.0 to +1.0) per tier  
+**Optimization**: Quantized to INT8 for inference speed
+
+### 8.3 Bayesian Optimization
+
+**Library**: `scikit-optimize`  
+**Target**: Optimize layer weights and entry thresholds  
+**Constraints**: Max drawdown < 15%, Min Sharpe > 1.0  
+**Frequency**: Weekly reoptimization based on feedback
+
+---
+
+## 9. Backward Compatibility Guarantee
+
+### 9.1 API Compatibility
+
+- **URL Stability**: All v1 endpoints remain functional at `/v1/` prefix
+- **Response Format**: `version` field included in all responses
+- **Deprecation Strategy**: 6-month notice before endpoint retirement
+- **Feature Flags**: New features disabled by default for legacy clients
+
+### 9.2 Database Compatibility
+
+- **Additive Only**: New columns added as nullable with defaults
+- **Views**: Legacy views (`signals_v1`, `portfolio_v1`) maintained
+- **Migration Rollback**: All migrations include `DOWN` scripts
+- **Version Check**: System refuses to start if DB version incompatible
+
+### 9.3 Skill Compatibility
+
+- **OpenClaw Protocol**: Version handshake on initialization
+- **Graceful Degradation**: If new features unavailable, skill falls back to v1 behavior
+- **Feature Negotiation**: Agent and skill agree on supported capabilities
+
+---
+
+## 10. Complete Docker Compose File
+
+Save as `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  # Database (PostgreSQL + TimescaleDB)
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: systemone-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-systemone}
+      POSTGRES_DB: systemone
+      POSTGRES_USER: ${DB_USER:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - systemone-network
+    command: >
+      postgres 
+      -c shared_preload_libraries=timescaledb
+      -c max_connections=200
+      -c log_min_messages=WARNING
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Cache + Message Broker)
+  redis:
+    image: redis:7-alpine
+    container_name: systemone-redis
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - systemone-network
+    command: redis-server 
+      --maxmemory 512mb 
+      --maxmemory-policy allkeys-lru 
+      --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Core Engine: Signals, Risk, WebSocket, Intermarket
+  core-engine:
+    build:
+      context: ./services/core-engine
+      dockerfile: Dockerfile
+    container_name: systemone-core
+    restart: unless-stopped
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-systemone}@postgres:5432/systemone
+      REDIS_URL: redis://redis:6379/0
+      
+      # OpenClaw Integration
+      OPENCLAW_BASE_URL: ${OPENCLAW_API_URL:-http://openclaw:8080}
+      OPENCLAW_API_KEY: ${OPENCLAW_API_KEY}
+      OPENCLAW_AGENT_ID: ${OPENCLAW_AGENT_ID:-stockman}
+      
+      # NTFY (OpenClaw-referenced)
+      NTFY_SERVER_URL: ${OPENCLAW_NTFY_SERVER:-https://ping.otchere.com}
+      NTFY_TOPIC: ${OPENCLAW_NTFY_TOPIC:-portfolio}
+      
+      # App Config
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./models:/app/models:ro
+      - core-logs:/app/logs
+    ports:
+      - "8001:8001"
+    networks:
+      - systemone-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # Intelligence Layer: ML, NLP, Optimization, OpenClaw Interface
+  intelligence-api:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-intelligence
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-systemone}@postgres:5432/systemone
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      
+      # OpenClaw
+      OPENCLAW_BASE_URL: ${OPENCLAW_API_URL:-http://openclaw:8080}
+      OPENCLAW_API_KEY: ${OPENCLAW_API_KEY}
+      
+      # AI Models
+      FINBERT_MODEL_PATH: /app/models/finbert
+      LSTM_MODEL_PATH: /app/models/lstm
+    volumes:
+      - ./models:/app/models:ro
+      - intel-logs:/app/logs
+    ports:
+      - "8002:8002"
+    networks:
+      - systemone-network
+    depends_on:
+      - postgres
+      - redis
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.5'
+
+  # Celery Worker (Background tasks)
+  celery-worker:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-celery
+    restart: unless-stopped
+    command: celery -A tasks worker --loglevel=info --concurrency=2 -n worker@%h
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-systemone}@postgres:5432/systemone
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./models:/app/models:ro
+      - celery-logs:/app/logs
+    networks:
+      - systemone-network
+    depends_on:
+      - redis
+      - postgres
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-beat
+    restart: unless-stopped
+    command: celery -A tasks beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-systemone}@postgres:5432/systemone
+    volumes:
+      - ./models:/app/models:ro
+    networks:
+      - systemone-network
+    depends_on:
+      - redis
+      - postgres
+
+  # WebUI Builder (One-time build)
+  webui-builder:
+    image: node:20-alpine
+    container_name: systemone-webui-build
+    working_dir: /app
+    volumes:
+      - ./webui:/app
+      - webui-build:/app/dist
+    command: >
+      sh -c "npm ci && npm run build && cp -r dist/* /output/"
+    volumes:
+      - webui-build:/output
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  webui-build:
+    driver: local
+  core-logs:
+  intel-logs:
+  celery-logs:
+
+networks:
+  systemone-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+```
+
+---
+
+## 11. Caddy Configuration (Host-Installed)
+
+If Caddy is installed on the host, create `/etc/caddy/Caddyfile`:
+
+```caddyfile
+# SystemOne Caddy Configuration
+# Assumes Caddy is host-installed, services in Docker
+
+{
+    auto_https off  # Set to 'on' with proper domain
+    admin off
+}
+
+:80 {
+    # WebUI Static Files
+    root * /path/to/systemone/webui/dist
+    file_server
+    try_files {path} /index.html
+
+    # API Core
+    handle_path /api/core/* {
+        reverse_proxy localhost:8001
+    }
+
+    # API Intelligence
+    handle_path /api/intel/* {
+        reverse_proxy localhost:8002
+    }
+
+    # WebSocket
+    handle_path /ws {
+        reverse_proxy localhost:8001
+    }
+
+    # OpenClaw Interface
+    handle_path /openclaw/* {
+        reverse_proxy localhost:8001
+    }
+
+    encode gzip
+    log {
+        output file /var/log/caddy/systemone.log
+    }
+}
+```
+
+---
+
+**End of Specification**
+
+**File Structure for Implementation**:
+```
+systemone-platform/
+├── docker-compose.yml          # Complete stack definition
+├── SKILLs.md                   # OpenClaw integration
+├── Caddyfile                   # Reverse proxy config
+├── .env.example                # Environment template
+├── init-scripts/
+│   └── V1__initial_schema.sql  # Database setup
+├── services/
+│   ├── core-engine/            # FastAPI app
+│   └── intelligence/           # FastAPI + Celery
+└── webui/                      # React TypeScript app
+```
+
+To use this specification:
+1. Save the OpenAPI YAML section as `openapi.yaml` for code generation
+2. Save the full document as `SPECIFICATION.md` for reference
+3. Implement services according to the architecture described
+4. Deploy using the provided Docker Compose configuration

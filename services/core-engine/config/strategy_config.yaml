@@ -1,0 +1,18 @@
+weights:
+  technical: 0.30
+  regime: 0.25
+  historical: 0.20
+  event: 0.25
+
+horizon_caps:
+  immediate: 60
+  near_term: 80
+  far_term: 70
+
+risk_limits:
+  max_position_pct: 5.0
+  kelly_fraction: 0.25
+
+conflict_penalty:
+  threshold_dispersion: 40
+  penalty_multiplier: 0.85

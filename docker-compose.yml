@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: systemone-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-systemone}
+      POSTGRES_DB: systemone
+      POSTGRES_USER: ${DB_USER:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - systemone-network
+    command: >
+      postgres
+      -c shared_preload_libraries=timescaledb
+      -c max_connections=200
+      -c log_min_messages=WARNING
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: systemone-redis
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - systemone-network
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  core-engine:
+    build:
+      context: ./services/core-engine
+      dockerfile: Dockerfile
+    container_name: systemone-core
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: systemone
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-systemone}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+      HTPASSWD_FILE: /config/users.htpasswd
+      OPENCLAW_ENABLED: ${OPENCLAW_ENABLED:-false}
+      OPENCLAW_API_URL: ${OPENCLAW_API_URL:-http://openclaw:8080}
+      OPENCLAW_API_KEY: ${OPENCLAW_API_KEY:-}
+      NTFY_ENABLED: ${NTFY_ENABLED:-false}
+      NTFY_SERVER_URL: ${NTFY_SERVER_URL:-https://ping.otchere.com}
+      NTFY_TOPIC: ${NTFY_TOPIC:-portfolio}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./config:/config
+      - core-logs:/app/logs
+    ports:
+      - "8001:8001"
+    networks:
+      - systemone-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  intelligence-api:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-intelligence
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: systemone
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-systemone}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      OPENCLAW_ENABLED: ${OPENCLAW_ENABLED:-false}
+      OPENCLAW_BASE_URL: ${OPENCLAW_API_URL:-http://openclaw:8080}
+      OPENCLAW_API_KEY: ${OPENCLAW_API_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./models:/app/models:ro
+      - intel-logs:/app/logs
+    ports:
+      - "8002:8002"
+    networks:
+      - systemone-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.5'
+
+  celery-worker:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-celery
+    restart: unless-stopped
+    command: celery -A app.tasks worker --loglevel=info --concurrency=2 -n worker@%h
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: systemone
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-systemone}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./models:/app/models:ro
+      - celery-logs:/app/logs
+    networks:
+      - systemone-network
+    depends_on:
+      - redis
+      - postgres
+
+  celery-beat:
+    build:
+      context: ./services/intelligence
+      dockerfile: Dockerfile
+    container_name: systemone-beat
+    restart: unless-stopped
+    command: celery -A app.tasks beat --loglevel=info
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: systemone
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-systemone}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    networks:
+      - systemone-network
+    depends_on:
+      - redis
+      - postgres
+
+  webui:
+    build:
+      context: ./webui
+      dockerfile: Dockerfile
+    container_name: systemone-webui
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - systemone-network
+    depends_on:
+      - core-engine
+      - intelligence-api
+
+volumes:
+  pgdata:
+  redisdata:
+  core-logs:
+  intel-logs:
+  celery-logs:
+
+networks:
+  systemone-network:
+    driver: bridge

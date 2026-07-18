@@ -1,0 +1,28 @@
+{
+    auto_https off
+}
+
+:80 {
+    root * /srv
+    file_server
+    try_files {path} /index.html
+
+    handle_path /api/core/* {
+        reverse_proxy core-engine:8001
+    }
+
+    handle_path /api/intel/* {
+        reverse_proxy intelligence-api:8002
+    }
+
+    handle_path /ws {
+        reverse_proxy core-engine:8001
+    }
+
+    encode gzip
+    log {
+        output stdout
+    }
+}
+
+}
