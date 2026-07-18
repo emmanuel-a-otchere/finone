@@ -4,7 +4,6 @@ import {
   Plus, Trash2, Edit2, X, Check, Target, ArrowLeftRight, BarChart3, Shield
 } from 'lucide-react';
 import { api } from '../lib/api';
-import { PositionsPanel } from '../components/PositionsPanel';
 
 interface Holding {
   symbol: string; qty: number; avg_cost: number; current_price: number | null;
@@ -467,8 +466,6 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
     );
 
     const unrealized = summary?.total_pnl ?? 0;
-    const totalCost = summary?.total_cost ?? 0;
-    const totalValue = summary?.total_value ?? 0;
     const realized = summary?.closed_positions?.reduce((sum: number, p: any) => sum + (p.pnl_realized || 0), 0) ?? 0;
     const winRate = summary?.win_rate ?? 0;
     const expectancy = summary?.expectancy ?? 0;
@@ -562,7 +559,6 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
 
     const openPositions = riskSummary?.open_positions ?? [];
     const totalValue = riskSummary?.total_value ?? 0;
-    const totalCost = riskSummary?.total_cost ?? 0;
 
     // Concentration: top 3 holdings by value
     const concentration = [...openPositions]
@@ -665,7 +661,9 @@ export function Portfolio({ activeTab: initialTab = 'overview' }: PortfolioProps
         )}
       </div>
     );
-  };/* ---------------------------------------------------------------- */
+  };
+
+  /* ---------------------------------------------------------------- */
   /*  Main render                                                      */
   /* ---------------------------------------------------------------- */
   return (

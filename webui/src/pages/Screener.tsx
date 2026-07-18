@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Search, Filter, TrendingUp, TrendingDown, Activity, BarChart3,
-  ArrowUpDown, ChevronDown, ChevronUp, X, Zap, DollarSign,
-  PieChart, Target, Layers, BookmarkPlus, ArrowRight
+  Filter, TrendingUp, TrendingDown, Activity, BarChart3,
+  ArrowUpDown, ChevronDown, ChevronUp, X, Zap, BookmarkPlus
 } from 'lucide-react';
 import { api } from '../lib/api';
 
@@ -123,6 +122,12 @@ export default function ScreenerPage({ activeTab = 'stock' }: { activeTab?: stri
 
   return (
     <div className="p-3 space-y-3" style={{ height: '100%', overflow: 'auto' }}>
+      {/* Non-stock tabs (etf/options/saved) are routed here but not yet implemented */}
+      {activeTab !== 'stock' && (
+        <div className="text-xs px-3 py-2 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)' }}>
+          The {activeTab} screener is coming soon — showing the stock screener for now.
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
