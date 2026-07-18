@@ -83,12 +83,12 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             placeholder="Symbol"
-            className="w-32 px-4 py-2 bg-dark-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
+            className="w-32 px-4 py-2 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
           />
           <button
             onClick={() => selectedLayer && loadDrilldown(selectedLayer)}
             disabled={drilldownLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-dark-800 hover:bg-dark-700 text-slate-300 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-inset hover-bg-token text-slate-300 rounded-lg transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${drilldownLoading ? 'animate-spin' : ''}`} />
             Analyze
@@ -99,7 +99,7 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-2">
           {loading ? (
-            <div className="bg-dark-900 border border-slate-800 rounded-xl p-4 text-slate-500">
+            <div className="card p-4 text-slate-500">
               Loading layers...
             </div>
           ) : (
@@ -110,7 +110,7 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
                 className={`w-full flex items-center justify-between p-4 rounded-xl border transition-colors ${
                   selectedLayer === layer.name
                     ? 'bg-primary-500/10 border-primary-500/30 text-primary-400'
-                    : 'bg-dark-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                    : 'bg-card-token border-token text-slate-300 hover:border-strong'
                 }`}
               >
                 <span className="font-medium">{layer.display_name}</span>
@@ -122,12 +122,12 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
 
         <div className="lg:col-span-3">
           {drilldownLoading ? (
-            <div className="bg-dark-900 border border-slate-800 rounded-xl p-12 text-center text-slate-500">
+            <div className="card p-12 text-center text-slate-500">
               Loading analysis...
             </div>
           ) : drilldown ? (
             <div className="space-y-6">
-              <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+              <div className="card p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">
                   {drilldown.layer_name.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} - {symbol}
                 </h2>
@@ -135,7 +135,7 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
                   {drilldown.datapoints.map((dp) => (
                     <div
                       key={dp.indicator}
-                      className="bg-dark-800 rounded-lg p-4 border border-slate-700"
+                      className="bg-inset rounded-lg p-4 border border-token"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <span className="text-sm text-slate-400">{dp.display_name}</span>
@@ -151,13 +151,13 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
               </div>
 
               {drilldown.cross_layer_impact && drilldown.cross_layer_impact.length > 0 && (
-                <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+                <div className="card p-6">
                   <h3 className="text-lg font-semibold text-white mb-4">Cross-Layer Impact</h3>
                   <div className="space-y-3">
                     {drilldown.cross_layer_impact.map((impact) => (
                       <div
                         key={impact.target_layer}
-                        className="flex items-center justify-between p-3 bg-dark-800 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-inset rounded-lg"
                       >
                         <div>
                           <span className="text-sm text-slate-300 capitalize">
@@ -183,7 +183,7 @@ export function Layers({ preselectLayer }: LayersProps = {}) {
               )}
             </div>
           ) : (
-            <div className="bg-dark-900 border border-slate-800 rounded-xl p-12 text-center text-slate-500">
+            <div className="card p-12 text-center text-slate-500">
               Select a layer to view analysis
             </div>
           )}
