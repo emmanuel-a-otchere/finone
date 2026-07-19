@@ -1,5 +1,7 @@
-// TickerStrip — real market indices via props OR api.getMarketIndices()
+// TickerStrip — static market index cards (mockup band 1, top row)
 // P2-1: VIX uses inverted coloring (rising VIX = red, falling VIX = green)
+// NOTE: renders exactly ONE element — it is grid child #1 of .dashboard-grid;
+// returning null or adding siblings would shift every :nth-child placement.
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
 
@@ -21,31 +23,44 @@ const INDEX_SYMBOLS = new Set(['S&P 500', 'NASDAQ', 'DOW', 'VIX']);
 // Symbols needing 4dp (forex)
 const FOREX_SYMBOLS = new Set(['EUR/USD']);
 
-// P2-1: VIX is inversely correlated to market — invert its color signal
-// Rising VIX = fear rising = negative → show RED
-// Falling VIX = fear declining = positive → show GREEN
-
-function vixColor(up: boolean): string {
-  // Inverted: standard green/red is OPPOSITE for VIX
-  return up ? 'var(--red)' : 'var(--green)';
+// Canvas can't resolve var() — read the token value at draw time
+function cssVar(name: string, fallback: string): string {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
 }
 
-function Sparkline({ data, up }: { data: number[]; up: boolean }) {
+// Deterministic placeholder series when no sparkData is provided
+function defaultSeries(seed: string, n = 24): number[] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const out: number[] = [];
+  let v = 50;
+  for (let i = 0; i < n; i++) {
+    h = (h * 1103515245 + 12345) >>> 0;
+    v += ((h % 1000) / 1000 - 0.5) * 8;
+    v = Math.max(10, Math.min(90, v));
+    out.push(v);
+  }
+  return out;
+}
+
+function Sparkline({ data, up, invert }: { data: number[]; up: boolean; invert?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const W = 80, H = 24;
+    const W = 96, H = 28;
     canvas.width = W * 2; canvas.height = H * 2;
     ctx.scale(2, 2);
     const min = Math.min(...data), max = Math.max(...data);
     const range = max - min || 1;
     const step = W / (data.length - 1);
     const pts = data.map((v, i) => ({ x: i * step, y: H - ((v - min) / range) * (H - 4) - 2 }));
-    const color = up ? '#22c55e' : '#ef4444';
-    const fillColor = up ? 'rgba(34,197,94,0.10)' : 'rgba(239,68,68,0.10)';
+    const positive = invert ? !up : up;
+    const color = positive ? cssVar('--green', '#32FF7E') : cssVar('--red', '#FF5A5A');
+    const fillColor = positive ? 'rgba(50,255,126,0.10)' : 'rgba(255,90,90,0.10)';
     ctx.beginPath(); ctx.moveTo(pts[0].x, H);
     pts.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.lineTo(pts[pts.length - 1].x, H); ctx.closePath();
@@ -53,8 +68,8 @@ function Sparkline({ data, up }: { data: number[]; up: boolean }) {
     ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
     pts.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-  }, [data, up]);
-  return <canvas ref={canvasRef} style={{ width: 80, height: 24, display: 'block' }} />;
+  }, [data, up, invert]);
+  return <canvas ref={canvasRef} style={{ width: 96, height: 28, display: 'block', flexShrink: 0 }} />;
 }
 
 export function TickerStrip({ tickers: propTickers }: Props) {
@@ -87,59 +102,72 @@ export function TickerStrip({ tickers: propTickers }: Props) {
 
   // P0-1: ALWAYS render the strip — returning null here removes grid child #1
   // from .dashboard-grid and shifts every card's :nth-child placement.
-  // With no data, render a stable-height placeholder instead.
-  const doubled = [...tickers, ...tickers];
-
-  // NOTE: ticker animation CSS lives in index.css (.ticker-track / .ticker-fade)
-  // so this component renders exactly ONE grid child in .dashboard-grid —
-  // <style> siblings would shift :nth-child card placement.
-  return (
+  if (tickers.length === 0) {
+    return (
       <div style={{
-        height: 40,
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-default)',
-        overflow: 'hidden',
+        height: 66,
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-lg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 11,
+        color: 'var(--text-muted)',
         flexShrink: 0,
-        position: 'relative',
-        zIndex: 10,
       }}>
-        <div className="ticker-fade" />
-        {tickers.length === 0 ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 11, color: 'var(--text-muted)' }}>
-            Market data unavailable
-          </div>
-        ) : (
-        <div className="ticker-track" style={{ display: 'flex', alignItems: 'center', height: '100%', whiteSpace: 'nowrap' }}>
-          {doubled.map((t, i) => {
-            const isVix = t.symbol === 'VIX';
-            // P2-1: VIX uses inverted coloring; all others use standard green/red
-            const deltaColor = isVix
-              ? vixColor(t.up)          // inverted for VIX
-              : (t.up ? 'var(--green)' : 'var(--red)');  // standard
-            return (
-              <div key={i} style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '0 24px',
-                borderRight: '1px solid var(--border-subtle)',
-                flexShrink: 0,
-              }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.02em', flexShrink: 0 }}>
-                  {t.symbol}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0 }}>
-                  {t.price}
-                </span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: deltaColor, flexShrink: 0 }}>
-                  {t.change}
-                </span>
-                {t.sparkData && <Sparkline data={t.sparkData} up={t.up} />}
-              </div>
-            );
-          })}
-        </div>
-        )}
+        Market data unavailable
       </div>
+    );
+  }
+
+  return (
+    <div style={{
+      display: 'flex',
+      gap: 16,
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
+      flexShrink: 0,
+    }}>
+      {tickers.map((t, i) => {
+        const isVix = t.symbol === 'VIX';
+        // P2-1: VIX uses inverted coloring; all others use standard green/red
+        const positive = isVix ? !t.up : t.up;
+        const deltaColor = positive ? 'var(--green)' : 'var(--red)';
+        return (
+          <div key={i} style={{
+            flex: '1 0 150px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '10px 14px',
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <span style={{
+                fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
+                textTransform: 'uppercase', letterSpacing: '0.06em',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {t.symbol}
+              </span>
+              <span style={{
+                fontSize: 15, fontWeight: 700, color: 'var(--text-primary)',
+                fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums',
+              }}>
+                {t.price}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: deltaColor, fontFamily: 'var(--font-mono)' }}>
+                {t.change}
+              </span>
+            </div>
+            <Sparkline data={t.sparkData ?? defaultSeries(t.symbol)} up={t.up} invert={isVix} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
