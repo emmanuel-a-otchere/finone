@@ -101,8 +101,10 @@ export interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  bootstrapped: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  bootstrap: () => Promise<void>;
 }
 
 // ---- Probability-Weighted Engine Types ----

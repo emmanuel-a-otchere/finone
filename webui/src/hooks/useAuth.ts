@@ -9,6 +9,7 @@ export const useAuth = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      bootstrapped: false,
 
       login: async (username: string, password: string) => {
         try {
@@ -33,9 +34,34 @@ export const useAuth = create<AuthState>()(
           isAuthenticated: false,
         });
       },
+
+      // Single-user bootstrap: the backend hands out a static token to anyone
+      // who can reach it (personal deployment — network access IS the access
+      // control). If the endpoint 404s the backend is multi-user; leave state
+      // untouched and the login page will show when needed.
+      bootstrap: async () => {
+        try {
+          const { access_token } = await api.getSingleUserToken();
+          api.setToken(access_token);
+          let username = 'owner';
+          try { username = (await api.getMe()).username; } catch { /* cosmetic */ }
+          set({
+            user: { username },
+            token: access_token,
+            isAuthenticated: true,
+          });
+        } catch {
+          // Multi-user mode — fall through to LoginPage.
+        } finally {
+          set({ bootstrapped: true });
+        }
+      },
     }),
     {
       name: 'systemone-auth',
+      // bootstrapped must always re-run on app start — persist it forced to
+      // false so a rehydrated store still shows the loading state first.
+      partialize: (state) => ({ ...state, bootstrapped: false }),
       onRehydrateStorage: () => (state) => {
         if (state?.token) {
           api.setToken(state.token);

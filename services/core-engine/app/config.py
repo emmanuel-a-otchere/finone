@@ -16,6 +16,15 @@ class Settings(BaseSettings):
     jwt_expiration_hours: int = 24
     htpasswd_file: str = "/config/users.htpasswd"
 
+    # Single-user mode (personal deployments). When enabled, the API hands out
+    # the static token below to anyone who can reach it (GET /auth/token) and
+    # every request authenticates as single_user_name — no login screen.
+    # Network access to the app IS the access control in this mode.
+    # Keep disabled for multi-user deployments (default).
+    single_user_mode: bool = False
+    single_user_token: str = ""
+    single_user_name: str = "owner"
+
     openclaw_enabled: bool = False
     openclaw_api_url: str = "http://openclaw:8080"
     openclaw_api_key: str = ""

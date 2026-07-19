@@ -60,6 +60,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
       HTPASSWD_FILE: /config/users.htpasswd
+      SINGLE_USER_MODE: ${SINGLE_USER_MODE:-false}
+      SINGLE_USER_TOKEN: ${SINGLE_USER_TOKEN:-}
+      SINGLE_USER_NAME: ${SINGLE_USER_NAME:-owner}
       OPENCLAW_ENABLED: ${OPENCLAW_ENABLED:-false}
       OPENCLAW_API_URL: ${OPENCLAW_API_URL:-http://openclaw:8080}
       OPENCLAW_API_KEY: ${OPENCLAW_API_KEY:-}
