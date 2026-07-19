@@ -33,12 +33,12 @@ const CELLS: HeatmapCell[] = [
 
 // Sector left-border accent colors — distinct from performance fill
 const SECTOR_BORDER: Record<string, string> = {
-  Technology: '#3b82f6',  // blue
-  Consumer:   '#eab308',  // yellow
-  Finance:    '#22c55e',  // green
-  Energy:     '#f97316',  // orange
-  Healthcare: '#a855f7',  // purple
-  Crypto:     '#ef4444',  // red
+  Technology: 'var(--accent-blue)',  // blue
+  Consumer:   'var(--yellow)',  // yellow
+  Finance:    'var(--green)',  // green
+  Energy:     'var(--orange)',  // orange
+  Healthcare: 'var(--accent-purple)',  // purple
+  Crypto:     'var(--red)',  // red
 };
 
 // Fill color from change % — green/red performance encoding (kept)

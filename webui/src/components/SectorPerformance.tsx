@@ -61,7 +61,7 @@ export function SectorPerformance() {
                     <div style={{ flex: 1, background: 'var(--bg-2)', borderRadius: 2, height: 8, position: 'relative' }}>
                       <div style={{ position: 'absolute', top: 0, [isPos ? 'left' : 'right']: '50%', width: `${barWidth}%`, height: '100%', borderRadius: 2, background: isPos ? 'var(--green)' : 'var(--red)', transition: 'width 0.4s' }} />
                     </div>
-                    <span style={{ width: 48, textAlign: 'right', color: isPos ? '#22c55e' : '#ef4444', fontWeight: 600, flexShrink: 0, fontSize: 11 }}>
+                    <span style={{ width: 48, textAlign: 'right', color: isPos ? 'var(--green)' : 'var(--red)', fontWeight: 600, flexShrink: 0, fontSize: 11 }}>
                       {isPos ? '+' : ''}{pct.toFixed(2)}%
                     </span>
                   </div>

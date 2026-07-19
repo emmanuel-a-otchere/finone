@@ -15,8 +15,8 @@ interface NewsFeedProps {
 }
 
 const TAG_COLORS = {
-  BULLISH: { bg: 'rgba(34,197,94,0.12)', color: 'var(--green)' },
-  BEARISH: { bg: 'rgba(239,68,68,0.12)', color: 'var(--red)' },
+  BULLISH: { bg: 'rgba(50,255,126,0.12)', color: 'var(--green)' },
+  BEARISH: { bg: 'rgba(255,90,90,0.12)', color: 'var(--red)' },
   MACRO: { bg: 'rgba(59,130,246,0.12)', color: 'var(--accent-blue)' },
 };
 

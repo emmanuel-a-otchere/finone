@@ -193,7 +193,7 @@ export function GlobalCommandBar({ onNavigate, onClose }: GlobalCommandBarProps)
                     onMouseEnter={() => setSelectedIndex(idx)}
                     style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '8px 16px', background: isSelected ? 'rgba(0,229,200,0.08)' : 'transparent',
+                      padding: '8px 16px', background: isSelected ? 'var(--primary-10)' : 'transparent',
                       border: 'none', cursor: 'pointer', textAlign: 'left',
                     }}
                   >
