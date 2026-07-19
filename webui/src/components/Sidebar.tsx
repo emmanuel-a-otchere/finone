@@ -1,13 +1,16 @@
 // Sidebar — compact horizontal rows: 18px lucide icon + 12px label, 36px min-height.
-// ≥1024px: full 208px sidebar · 768–1023px: 64px icon rail (labels hidden via CSS,
+// ≥1024px: full 260px sidebar · 768–1023px: 64px icon rail (labels hidden via CSS,
 // icons auto-center) · <768px: hidden (bottom tab bar takes over)
 import { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard, LineChart, Zap, Search, Layers, Briefcase,
   Star, Newspaper, Bell, ClipboardList, Settings, ChevronDown,
+  Sun, Moon, LogOut, TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
 import { type NavId, getParentNavId, isUnderParent } from '../NavId';
+import { useTheme } from '../hooks/useTheme';
+import { useAuth } from '../hooks/useAuth';
 
 interface SubItem { label: string; navId: NavId; }
 interface NavItem { id: NavId; label: string; icon: LucideIcon; subItems?: SubItem[]; }
@@ -89,7 +92,7 @@ function SubMenuFlyout({ items, onNavigate, currentPage }: {
             color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
             fontWeight: isActive ? 600 : 400,
             cursor: 'pointer', whiteSpace: 'nowrap',
-            background: isActive ? 'rgba(0,229,200,0.08)' : 'transparent',
+            background: isActive ? 'var(--primary-10)' : 'transparent',
             borderLeft: isActive ? '2px solid var(--accent-cyan)' : '2px solid transparent',
           }}
           onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--bg-card-hover)'; }}
@@ -117,7 +120,7 @@ function SubMenuAccordion({ items, onNavigate, currentPage }: {
             color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
             fontWeight: isActive ? 600 : 400,
             cursor: 'pointer', whiteSpace: 'nowrap',
-            background: isActive ? 'rgba(0,229,200,0.08)' : 'transparent',
+            background: isActive ? 'var(--primary-10)' : 'transparent',
             border: 'none', borderRadius: 6, textAlign: 'left',
             fontFamily: 'var(--font-ui)',
             minHeight: 44,                   // 44px touch target on mobile
@@ -133,6 +136,8 @@ function SubMenuAccordion({ items, onNavigate, currentPage }: {
 export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNavigate: (id: NavId) => void; }) {
   const [expandedId, setExpandedId] = useState<NavId | null>(null);
   const navRef = useRef<HTMLElement>(null);
+  const { toggleTheme, isDark } = useTheme();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -151,8 +156,26 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
 
   return (
     // Root is <aside className="app-sidebar"> so .shell > aside rules apply:
-    // ≥1024px full 208px sidebar · 768–1023px 64px icon rail (labels hidden) · <768px hidden (tab bar takes over)
+    // ≥1024px full 260px sidebar · 768–1023px 64px icon rail (labels hidden) · <768px hidden (tab bar takes over)
     <aside ref={navRef} role="navigation" aria-label="Main navigation" className="app-sidebar">
+      {/* Brand block — text hidden in 64px rail via .nav-label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 8px 14px', width: '100%' }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          background: 'var(--accent-cyan)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <TrendingUp size={18} strokeWidth={2.2} color="#0B1120" aria-hidden />
+        </div>
+        <div className="nav-label" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, textAlign: 'left' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-ui)' }}>
+            SystemOne
+          </span>
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Trading Intelligence
+          </span>
+        </div>
+      </div>
       {NAV_ITEMS.map(item => {
         const hasSubs = !!item.subItems;
         const isParentActive = isUnderParent(currentPage, item.id);
@@ -184,7 +207,7 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
                 alignItems: 'center', justifyContent: 'center',
                 padding: '7px 12px',
                 borderRadius: 8, cursor: 'pointer', border: 'none',
-                background: isParentActive ? 'rgba(0,229,200,0.1)' : 'transparent',
+                background: isParentActive ? 'var(--primary-10)' : 'transparent',
                 color: isParentActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
                 transition: 'all 120ms ease', position: 'relative',
               }}
@@ -234,6 +257,78 @@ export function Sidebar({ currentPage, onNavigate }: { currentPage: NavId; onNav
           </div>
         );
       })}
+
+      {/* Bottom section — theme toggle, user, logout (pinned to sidebar foot) */}
+      <div style={{
+        marginTop: 'auto',
+        paddingTop: 10,
+        borderTop: '1px solid var(--border-default)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        width: '100%',
+      }}>
+        <button
+          onClick={toggleTheme}
+          aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+          title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+          style={{
+            width: '100%', minHeight: 36,
+            display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            padding: '7px 12px', borderRadius: 8, cursor: 'pointer', border: 'none',
+            background: 'transparent', color: 'var(--text-secondary)',
+            transition: 'all 120ms ease',
+          }}
+        >
+          {isDark
+            ? <Moon size={18} strokeWidth={1.8} style={{ flexShrink: 0 }} aria-hidden />
+            : <Sun size={18} strokeWidth={1.8} style={{ flexShrink: 0 }} aria-hidden />}
+          <span className="nav-label" style={{ flex: 1, marginLeft: 10, fontSize: 12, textAlign: 'left', fontFamily: 'var(--font-ui)' }}>
+            {isDark ? 'Dark' : 'Light'}
+          </span>
+        </button>
+
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '7px 12px', width: '100%',
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+            background: 'var(--primary-15)', border: '1px solid var(--primary-30)',
+            color: 'var(--accent-cyan)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-ui)',
+          }}>
+            {(user?.username ?? 'U').charAt(0).toUpperCase()}
+          </div>
+          <div className="nav-label" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25, textAlign: 'left', minWidth: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.username ?? 'User'}
+            </span>
+            <span style={{ fontSize: 10, color: 'var(--accent-cyan)' }}>
+              Pro Plan
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={logout}
+          aria-label="Sign out"
+          title="Sign out"
+          style={{
+            width: '100%', minHeight: 36,
+            display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            padding: '7px 12px', borderRadius: 8, cursor: 'pointer', border: 'none',
+            background: 'transparent', color: 'var(--text-secondary)',
+            transition: 'all 120ms ease',
+          }}
+        >
+          <LogOut size={18} strokeWidth={1.8} style={{ flexShrink: 0 }} aria-hidden />
+          <span className="nav-label" style={{ flex: 1, marginLeft: 10, fontSize: 12, textAlign: 'left', fontFamily: 'var(--font-ui)' }}>
+            Logout
+          </span>
+        </button>
+      </div>
     </aside>
   );
 }
