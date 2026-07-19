@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type CSSProperties } from 'react';
 import { Menu, Star, Bell, Sun, Moon, Search } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../hooks/useAuth';
@@ -52,9 +52,20 @@ function MarketStatusBadge() {
     return () => clearInterval(id);
   }, []);
 
+  const chipStyle: CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 6,
+    fontSize: 10, color: 'var(--text-secondary)',
+    background: 'var(--primary-10)',
+    border: '1px solid var(--primary-30)',
+    borderRadius: 'var(--radius-pill)',
+    padding: '4px 10px',
+    marginLeft: 8,
+    whiteSpace: 'nowrap',
+  };
+
   if (loading || !mkt) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', marginLeft: 8 }}>
+      <div className="hidden sm:flex" style={chipStyle}>
         <span className="status-dot" />
         <span>—</span>
       </div>
@@ -68,9 +79,11 @@ function MarketStatusBadge() {
     : 'var(--text-secondary)';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', marginLeft: 8 }}>
+    <div className="hidden sm:flex" style={chipStyle}>
       <span className="status-dot" style={{ background: dotColor }} />
       <span>{mkt.status_label}</span>
+      <span style={{ color: 'var(--text-muted)' }}>·</span>
+      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>v2.5.0</span>
     </div>
   );
 }
@@ -142,7 +155,7 @@ function SearchBar({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           value={query}
           onChange={(e) => handleQuery(e.target.value)}
           onFocus={() => query.trim() && results.length && setOpen(true)}
-          style={{ width: 180, height: 30, fontSize: 11, paddingLeft: 32 }}
+          style={{ width: 'min(460px, 34vw)', height: 34, fontSize: 11, paddingLeft: 32 }}
         />
         <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: 11, display: 'flex', alignItems: 'center' }}>
           {loading ? '…' : <Search size={12} strokeWidth={1.8} aria-hidden />}
@@ -253,12 +266,12 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
   return (
     <header
       style={{
-        height:        56,
+        height:        72,
         background:    'var(--bg-surface)',
         borderBottom:  '1px solid var(--border-default)',
         display:       'flex',
         alignItems:    'center',
-        padding:       '0 16px',
+        padding:       '0 24px',
         gap:           14,
         flexShrink:    0,
         position:      'sticky',
@@ -358,9 +371,6 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
           </div>
         )}
       </div>
-
-      {/* App version — hidden below 768px to declutter the mobile top bar */}
-      <span aria-label="App version 2.5.0" className="hidden md:inline" style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', cursor: 'default' }}>v2.5.0</span>
     </header>
   );
 }

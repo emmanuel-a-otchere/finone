@@ -2,6 +2,7 @@ import { type NavId } from '../NavId';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,8 +17,8 @@ export function Layout({ children, currentPage, onNavigate, pageTitle }: LayoutP
       <Header currentPage={currentPage} onNavigate={onNavigate} pageTitle={pageTitle} />
       {/*
         Shell layout — index.html .shell spec:
-        - grid(208px 1fr) — positioned directly below header (top:56px)
-        - sidebar is direct grid child, sticky at top:56px so it scrolls WITH header
+        - grid(260px 1fr) — positioned directly below header (top:72px)
+        - sidebar is direct grid child, sticky at top:72px so it scrolls WITH header
         - main overflow-y:auto — independent scroll
         Breakpoints: ≥1024px full sidebar | 768-1023 icon rail | <768px sidebar hidden + tabbar
       */}
@@ -25,9 +26,13 @@ export function Layout({ children, currentPage, onNavigate, pageTitle }: LayoutP
         {/* Sidebar — direct grid child, sticky scrolls with header */}
         <Sidebar currentPage={currentPage} onNavigate={onNavigate} />
         {/* Main — scrollable content area */}
-        <main style={{ overflowY: 'auto', overflowX: 'hidden', minWidth: 0, padding: 20 }}>
+        <main style={{ overflowY: 'auto', overflowX: 'hidden', minWidth: 0, padding: 24 }}>
           {children}
         </main>
+      </div>
+      {/* Footer badge bar — hidden below 768px where the fixed BottomNav would overlay it */}
+      <div className="hidden md:block">
+        <Footer />
       </div>
       {/* Mobile tab bar — only below 768px; never overlaps the sidebar/icon rail */}
       <div className="md:hidden">

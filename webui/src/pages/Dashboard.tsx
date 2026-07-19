@@ -7,7 +7,6 @@ import { MarketTrend } from '../components/MarketTrend';
 import { MarketHeatmap } from '../components/MarketHeatmap';
 import { SectorPerformance } from '../components/SectorPerformance';
 import { PortfolioDonut } from '../components/PortfolioDonut';
-import { PortfolioDrift } from '../components/PortfolioDrift';
 import { NewsFeed } from '../components/NewsFeed';
 import { HotTakes } from '../components/HotTakes';
 import { HotSymbols } from '../components/HotSymbols';
@@ -40,7 +39,6 @@ export function Dashboard() {
       <NewsFeed />
       <MarketHeatmap />
       <PortfolioDonut summary={null} />
-      <PortfolioDrift data={null} />
     </div>
   );
 }
