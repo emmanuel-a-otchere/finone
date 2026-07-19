@@ -32,7 +32,7 @@ export function HotSymbols({ signals }: HotSymbolsProps) {
     <div className="card" data-card="table" style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
       <div className="card-head">
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
-          Active Signals
+          Market Movers
           {hasSignals && <span style={{ color: 'var(--accent-cyan)', marginLeft: 6, fontSize: 10 }}>({totalFiltered.length})</span>}
         </span>
         {/* P1-4: buttons disabled when no signals */}
@@ -55,7 +55,7 @@ export function HotSymbols({ signals }: HotSymbolsProps) {
                 opacity: hasSignals ? 1 : 0.5,
               }}
             >
-              {t === 'gainers' ? 'Gainers' : t === 'losers' ? 'Losers' : 'Active'}
+              {t === 'gainers' ? 'Top Gainers' : t === 'losers' ? 'Top Losers' : 'Most Active'}
             </button>
           ))}
         </div>
@@ -99,7 +99,7 @@ export function HotSymbols({ signals }: HotSymbolsProps) {
         )}
       </div>
       <div className="card-footer">
-        <a href="#" className="text-2xs" style={{ color: 'var(--accent-cyan)' }}>View All Signals →</a>
+        <a href="#" className="text-2xs" style={{ color: 'var(--accent-cyan)' }}>View All Movers →</a>
       </div>
     </div>
   );

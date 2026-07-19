@@ -78,7 +78,7 @@ export function PortfolioDonut({ summary }: PortfolioDonutProps) {
                 </ResponsiveContainer>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>Total Value</span>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: 'white', fontFamily: 'var(--font-mono)' }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
                     ${(summary.totalValue / 1000).toFixed(1)}k
                   </span>
                   {summary && (

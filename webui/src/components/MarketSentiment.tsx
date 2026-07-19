@@ -2,6 +2,12 @@
 import { useRef, useState, useEffect } from 'react';
 
 const PERIODS = ['1D', '1W', '1M', '3M', '1Y'];
+
+// Canvas can't resolve var() — read the token value at draw time
+function cssVar(name: string, fallback: string): string {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
 const HISTORY = [72, 75, 78, 76, 71, 69, 68];
 const HISTORY_PREV = [70, 71, 72, 71, 69, 67, 66];
 
@@ -13,14 +19,14 @@ function Sparkline7({ data, up }: { data: number[]; up: boolean }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const W = 120, H = 28;
+    const W = 200, H = 28;
     canvas.width = W * 2; canvas.height = H * 2; ctx.scale(2, 2);
     const min = Math.min(...data), max = Math.max(...data);
     const range = max - min || 1;
     const step = W / (data.length - 1);
     const pts = data.map((v, i) => ({ x: i * step, y: H - ((v - min) / range) * (H - 4) - 2 }));
-    const color = up ? '#22c55e' : '#ef4444';
-    const fillColor = up ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+    const color = up ? cssVar('--green', '#32FF7E') : cssVar('--red', '#FF5A5A');
+    const fillColor = up ? 'rgba(50,255,126,0.12)' : 'rgba(255,90,90,0.12)';
     ctx.beginPath(); ctx.moveTo(pts[0].x, H);
     pts.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.lineTo(pts[pts.length - 1].x, H); ctx.closePath();
@@ -29,7 +35,7 @@ function Sparkline7({ data, up }: { data: number[]; up: boolean }) {
     pts.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
   }, [data, up]);
-  return <canvas ref={canvasRef} style={{ width: 120, height: 28, display: 'block' }} />;
+  return <canvas ref={canvasRef} style={{ width: '100%', height: 28, display: 'block' }} />;
 }
 
 // P2-5: .seg-control media query lives in index.css (shared) — no <style> tag here,
@@ -85,7 +91,7 @@ export function MarketSentiment() {
               <span>{up ? '▲' : '▼'} {Math.abs(delta).toFixed(0)}</span>
               <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>vs prev</span>
             </div>
-            <div style={{ fontSize: 12, color: up ? 'var(--green)' : 'var(--red)', fontWeight: 600, marginTop: 2 }}>{label}</div>
+            <div style={{ fontSize: 14, color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700, marginTop: 2 }}>{label}</div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>/100</div>
           </div>
           <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
