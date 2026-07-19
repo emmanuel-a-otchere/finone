@@ -175,7 +175,7 @@ git clone https://github.com/emmanuel-a-otchere/finone.git
 cd finone
 
 cp .env.example .env
-# Edit .env with your database, Redis, and JWT secret values
+# Edit .env — database, Redis, JWT secret, and SINGLE_USER_TOKEN values
 ```
 
 ### 2 — Start the full stack
@@ -185,7 +185,7 @@ cp .env.example .env
 make build
 make up
 
-# Create an admin user
+# Multi-user mode only: create an admin user (not needed in single-user mode)
 make add-user
 ```
 
@@ -194,6 +194,9 @@ make add-user
 ```
 http://localhost:5173
 ```
+
+In single-user mode (`SINGLE_USER_MODE=true`, the default in `.env.example`)
+there is no login screen — the dashboard opens straight into the app.
 
 ### Using Docker Compose directly
 
@@ -205,6 +208,35 @@ from app.api.admin import create_user
 import asyncio; asyncio.run(create_user('admin', 'password'))
 "
 ```
+
+### Authentication modes
+
+**Single-user mode** (recommended for personal deployments): set
+`SINGLE_USER_MODE=true` plus a long random `SINGLE_USER_TOKEN` in `.env`.
+No login screen — the UI fetches the static token from the API on start and
+every request authenticates as `SINGLE_USER_NAME` (default `owner`). Anyone
+who can reach the app can use it, so keep the instance private (LAN / VPN /
+reverse-proxy allowlist).
+
+**Multi-user mode**: set `SINGLE_USER_MODE=false` and create users with
+`make add-user`. The app shows the login screen and issues JWTs from the
+htpasswd file as before. Both modes can be switched at any time via env.
+
+### QA seed data
+
+A deterministic test dataset (QA epic #14, issue #16) for functional
+validation — signals across the full protocol × confidence × status matrix
+(including a null-field edge case), two portfolios (populated + empty),
+open/closed positions, watchlist items, alert deliveries, 45 days of
+fear/greed + sentiment snapshots, 90 days of synthetic OHLCV per seed
+symbol, and layer-analysis cache rows.
+
+```bash
+make seed        # write the dataset (idempotent — safe to re-run)
+make seed-dry    # print the dataset summary without writing
+```
+
+Source: `services/core-engine/app/scripts/seed_test_data.py`.
 
 ---
 

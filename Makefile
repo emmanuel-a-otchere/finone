@@ -58,3 +58,10 @@ package:
 health:
 	@curl -s http://localhost:8001/health | python -m json.tool
 	@curl -s http://localhost:8002/health | python -m json.tool
+
+# Seed deterministic QA test data (issue #16) into the running stack
+seed:
+	docker-compose exec core-engine python -m app.scripts.seed_test_data
+
+seed-dry:
+	docker-compose exec core-engine python -m app.scripts.seed_test_data --dry-run

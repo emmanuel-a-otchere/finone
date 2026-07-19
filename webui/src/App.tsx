@@ -131,8 +131,12 @@ const SUB_PAGE_TABS: Partial<Record<NavId, { parent: NavId; tab: TabKey }>> = {
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, bootstrapped, bootstrap } = useAuth();
   const [commandBarOpen, setCommandBarOpen] = useState(false);
+
+  // Single-user bootstrap — silently authenticates when the backend is in
+  // single-user mode; otherwise falls back to the login page.
+  useEffect(() => { bootstrap(); }, []);
 
   // Map URL path -> NavId
   function pathToNavId(path: string): NavId {
@@ -250,7 +254,14 @@ export default function App() {
     }
   };
 
-  // Auth guard — redirect to login if not authenticated
+  // Auth guard — wait for the single-user bootstrap attempt first
+  if (!bootstrapped) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="text-slate-500 text-sm">Loading SystemOne…</div>
+      </div>
+    );
+  }
   if (!isAuthenticated) {
     return <LoginPage />;
   }

@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
 from jose import jwt, JWTError
@@ -52,6 +53,12 @@ class AuthService:
         return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
     def verify_token(self, token: str) -> str | None:
+        # Single-user mode: accept the static configured token and authenticate
+        # as the single user. Constant-time compare; JWT path stays intact so
+        # htpasswd logins keep working in both modes.
+        if settings.single_user_mode and settings.single_user_token:
+            if secrets.compare_digest(token, settings.single_user_token):
+                return settings.single_user_name
         try:
             payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
             username: str = payload.get("sub")

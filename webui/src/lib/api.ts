@@ -165,6 +165,20 @@ class ApiClient {
     return response.json();
   }
 
+  /** Single-user mode: fetch the static token. Throws (404) when the backend
+      is in multi-user mode — caller falls back to the login page. */
+  async getSingleUserToken(): Promise<{ access_token: string }> {
+    const response = await fetch(`${API_BASE}/auth/token`);
+    if (!response.ok) throw new Error("Single-user mode not enabled");
+    return response.json();
+  }
+
+  async getMe(): Promise<{ username: string }> {
+    const response = await fetch(`${API_BASE}/auth/me`, { headers: this.getHeaders() });
+    if (!response.ok) throw new Error("Failed to fetch current user");
+    return response.json();
+  }
+
   // ---- Signals ----
   async getSignals(status?: string, symbol?: string, limit = 50) {
     const params = new URLSearchParams();
