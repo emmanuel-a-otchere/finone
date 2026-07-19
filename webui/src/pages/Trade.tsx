@@ -118,7 +118,7 @@ export function Trade() {
 
       {/* Order Modal */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(13,15,20,0.85)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(9,13,22,0.85)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
           onClick={e => { if (e.target === e.currentTarget) setShowForm(false); }}>
           <div className="card" style={{ width: '100%', maxWidth: 440, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Modal header */}
@@ -145,7 +145,7 @@ export function Trade() {
                   {(['BUY', 'SELL'] as const).map(side => (
                     <button key={side} onClick={() => setForm(f => ({ ...f, side }))}
                       style={{ padding: '10px', borderRadius: 8, border: '1px solid', borderColor: form.side === side ? (side === 'BUY' ? 'var(--green)' : 'var(--red)') : 'var(--border-default)',
-                        background: form.side === side ? (side === 'BUY' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)') : 'var(--bg-surface)',
+                        background: form.side === side ? (side === 'BUY' ? 'rgba(50,255,126,0.12)' : 'rgba(255,90,90,0.12)') : 'var(--bg-surface)',
                         color: form.side === side ? (side === 'BUY' ? 'var(--green)' : 'var(--red)') : 'var(--text-muted)',
                         cursor: 'pointer', fontFamily: 'var(--font-ui)', fontWeight: 700, fontSize: 13, transition: 'all 150ms' }}>
                       {side}
@@ -168,7 +168,7 @@ export function Trade() {
                     {(['MARKET', 'LIMIT'] as const).map(t => (
                       <button key={t} onClick={() => setForm(f => ({ ...f, type: t }))}
                         style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid', borderColor: form.type === t ? 'var(--accent-cyan)' : 'var(--border-default)',
-                          background: form.type === t ? 'rgba(0,229,200,0.1)' : 'var(--bg-surface)',
+                          background: form.type === t ? 'var(--primary-10)' : 'var(--bg-surface)',
                           color: form.type === t ? 'var(--accent-cyan)' : 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 12, transition: 'all 150ms' }}>
                         {t}
                       </button>

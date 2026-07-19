@@ -250,7 +250,7 @@ export default function ScreenerPage({ activeTab = 'stock' }: { activeTab?: stri
                     </td>
                     <td className="py-2 px-2">
                       <span className="px-1.5 py-0.5 rounded text-2xs font-medium" style={{
-                        background: stock.trend === 'ABOVE_BOTH' ? 'rgba(34,197,94,0.15)' : stock.trend === 'BELOW_BOTH' ? 'rgba(239,68,68,0.15)' : 'rgba(234,179,8,0.15)',
+                        background: stock.trend === 'ABOVE_BOTH' ? 'var(--emerald-15)' : stock.trend === 'BELOW_BOTH' ? 'var(--red-15)' : 'var(--amber-15)',
                         color: stock.trend === 'ABOVE_BOTH' ? 'var(--green)' : stock.trend === 'BELOW_BOTH' ? 'var(--red)' : 'var(--yellow)'
                       }}>
                         {stock.trend.replace(/_/g, ' ')}
@@ -258,7 +258,7 @@ export default function ScreenerPage({ activeTab = 'stock' }: { activeTab?: stri
                     </td>
                     <td className="py-2 px-2">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-8 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-body)' }}>
+                        <div className="w-8 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-input)' }}>
                           <div className="h-full rounded-full" style={{ width: `${stock.hotness}%`, background: hotColor }} />
                         </div>
                         <span className="font-mono" style={{ color: hotColor }}>{stock.hotness.toFixed(0)}</span>
@@ -304,7 +304,7 @@ function FilterInput({ label, value, onChange, placeholder }: { label: string; v
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full px-2 py-1 rounded text-xs border-none outline-none"
-        style={{ background: 'var(--bg-body)', color: 'var(--text-primary)' }}
+        style={{ background: 'var(--bg-input)', color: 'var(--text-primary)' }}
       />
     </div>
   );
@@ -318,7 +318,7 @@ function FilterSelect({ label, value, onChange, options, labels }: { label: stri
         value={value}
         onChange={e => onChange(e.target.value)}
         className="w-full px-2 py-1 rounded text-xs border-none outline-none"
-        style={{ background: 'var(--bg-body)', color: 'var(--text-primary)' }}
+        style={{ background: 'var(--bg-input)', color: 'var(--text-primary)' }}
       >
         {options.map((opt, i) => (
           <option key={opt || 'any'} value={opt}>{labels?.[i] ?? (opt || 'Any')}</option>
