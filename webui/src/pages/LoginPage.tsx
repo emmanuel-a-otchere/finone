@@ -18,7 +18,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-base flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo / Branding */}
         <div className="text-center mb-8">
@@ -28,7 +28,7 @@ export function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <form onSubmit={handleSubmit} className="bg-dark-800 border border-slate-700 rounded-2xl p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-inset border border-token rounded-2xl p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5" htmlFor="username">
               Username
@@ -40,7 +40,7 @@ export function LoginPage() {
               value={username}
               onChange={e => setUsername(e.target.value)}
               required
-              className="w-full px-4 py-2.5 bg-dark-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
               placeholder="admin"
             />
           </div>
@@ -56,7 +56,7 @@ export function LoginPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2.5 bg-dark-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-inset border border-token rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
               placeholder="••••••••"
             />
           </div>

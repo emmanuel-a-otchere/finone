@@ -38,13 +38,13 @@ export function TransactionsPanel({ selectedId }: TransactionsPanelProps) {
   }
 
   if (txLoading) return (
-    <div className="bg-dark-900 border border-slate-800 rounded-xl p-12 text-center text-slate-500">Loading transactions...</div>
+    <div className="card p-12 text-center text-slate-500">Loading transactions...</div>
   );
 
   return (
-    <div className="bg-dark-900 border border-slate-800 rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Transaction History</h2>
+    <div className="card overflow-hidden">
+      <div className="card-header flex items-center justify-between">
+        <h2 className="card-title">Transaction History</h2>
         <span className="text-slate-500 text-sm">{positions.length} records</span>
       </div>
       {positions.length === 0 ? (
@@ -52,7 +52,7 @@ export function TransactionsPanel({ selectedId }: TransactionsPanelProps) {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-dark-800 text-slate-400"><tr>
+            <thead className="bg-inset text-slate-400"><tr>
               <th className="text-left px-6 py-3 font-medium">Date</th>
               <th className="text-left px-6 py-3 font-medium">Type</th>
               <th className="text-left px-6 py-3 font-medium">Symbol</th>
@@ -62,9 +62,9 @@ export function TransactionsPanel({ selectedId }: TransactionsPanelProps) {
               <th className="text-right px-6 py-3 font-medium">P&L %</th>
               <th className="text-left px-6 py-3 font-medium">Status</th>
             </tr></thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-token">
               {positions.map((tx, i) => (
-                <tr key={i} className="hover:bg-dark-800/50 transition-colors">
+                <tr key={i} className="hover-bg-token transition-colors">
                   <td className="px-6 py-4 text-slate-400">{new Date(tx.date).toLocaleDateString()}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${tx.type === 'BUY' ? 'bg-success-500/10 text-success-400' : 'bg-danger-500/10 text-danger-400'}`}>

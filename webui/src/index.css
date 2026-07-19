@@ -574,6 +574,18 @@
     flex-shrink: 0;
   }
 
+  /* ── Token-backed utilities for the page/card migration (#6) ──
+     Replace hardcoded dark/slate surface classes on non-dashboard
+     pages so every surface routes through the theme tokens. */
+  .bg-base        { background-color: var(--bg-base); }
+  .bg-inset       { background-color: var(--bg-surface); }
+  .bg-card-token  { background-color: var(--bg-card); }
+  .border-token        { border-color: var(--border-default); }
+  .border-token-subtle { border-color: var(--border-subtle); }
+  .divide-token > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-subtle); }
+  .hover-bg-token:hover { background-color: var(--bg-card-hover); }
+  .hover\:border-strong:hover { border-color: var(--border-active); }
+
   /* ── §19.4 IBM Plex Fallback (minimizes reflow on font swap) ── */
   @font-face {
     font-family: 'IBM Plex Sans Fallback';

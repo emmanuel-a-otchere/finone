@@ -50,7 +50,7 @@ export function DriftGauge({ maxDrift }: { maxDrift: number }) {
   else if (maxDrift > 3) { color = 'var(--accent-cyan)'; label = 'Slight'; }
 
   return (
-    <div className="bg-dark-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center">
+    <div className="card p-6 flex flex-col items-center">
       <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
         <Target className="w-5 h-5 text-accent-cyan" /> Allocation Drift
       </h2>

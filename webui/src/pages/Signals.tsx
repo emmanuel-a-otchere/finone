@@ -304,7 +304,7 @@ export function Signals() {
           { label: 'Stop',     value: signal.stop_loss,       color: 'text-red-400' },
           { label: 'Target',   value: signal.take_profit,     color: 'text-emerald-400' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-dark-800 rounded-xl p-4 text-center">
+          <div key={label} className="bg-inset rounded-xl p-4 text-center">
             <div className="text-xs text-slate-500 mb-1">{label}</div>
             <div className={`text-lg font-bold font-mono ${color}`}>
               {value != null ? `$${value.toFixed(2)}` : '--'}
@@ -314,7 +314,7 @@ export function Signals() {
       </div>
 
       {/* Confidence */}
-      <div className="bg-dark-800 rounded-xl p-4">
+      <div className="bg-inset rounded-xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-slate-400">Confidence Score</span>
           <span className={`text-lg font-bold ${
@@ -323,7 +323,7 @@ export function Signals() {
             (signal.confidence_score ?? 0) >= 50 ? 'text-amber-400' : 'text-slate-400'
           }`}>{signal.confidence_score ?? 0}%</span>
         </div>
-        <div className="h-2 bg-dark-800 rounded-full overflow-hidden">
+        <div className="h-2 bg-inset rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${signal.confidence_score ?? 0}%`,
@@ -344,7 +344,7 @@ export function Signals() {
         ) : infoError ? (
           <div className="text-amber-400 text-sm py-4">{infoError}</div>
         ) : info ? (
-          <div className="bg-dark-800 rounded-xl p-4 space-y-3">
+          <div className="bg-inset rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-white font-semibold">{info.name}</span>
               <span className="text-xs text-slate-400">{info.exchange || '—'}</span>
@@ -372,7 +372,7 @@ export function Signals() {
           { label: 'Est. Hold',   value: signal.eta_hours != null ? (signal.eta_hours < 24 ? `${signal.eta_hours}h` : `${Math.round(signal.eta_hours/24)}d`) : '--', color: 'text-slate-300' },
           { label: 'ATR',         value: signal.atr != null ? `$${signal.atr.toFixed(2)}` : '--', color: 'text-slate-300' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-dark-800 rounded-xl p-3 text-center">
+          <div key={label} className="bg-inset rounded-xl p-3 text-center">
             <div className="text-xs text-slate-500 mb-1">{label}</div>
             <div className={`text-sm font-bold font-mono ${color}`}>{value}</div>
           </div>
@@ -416,7 +416,7 @@ export function Signals() {
                   <div key={key} className="flex items-center gap-3">
                     <span className="text-slate-400 w-6">{icon}</span>
                     <span className="text-sm text-slate-300 w-36">{label}</span>
-                    <div className="flex-1 h-2 bg-dark-800 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-inset rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{
                         width: `${val}%`,
                         background: val >= 70 ? 'var(--green)' : val >= 50 ? 'var(--accent-cyan)' : 'var(--text-muted)',
@@ -426,7 +426,7 @@ export function Signals() {
                   </div>
                 );
               })}
-              <div className="pt-2 border-t border-dark-900">
+              <div className="pt-2 border-t border-token">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-300">Multi-Timeframe Alignment</span>
                   <span className="text-sm font-mono text-primary">{scores.multi_timeframe ?? 0}/100</span>
@@ -518,7 +518,7 @@ export function Signals() {
           </div>
           <input type="range" min="0" max="100" value={confidenceThreshold}
             onChange={e => setConfidenceThreshold(Number(e.target.value))}
-            className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+            className="w-full h-2 bg-inset rounded-lg appearance-none cursor-pointer accent-primary-500"
           />
           <div className="flex justify-between text-xs text-slate-500">
             <span>0 (all)</span><span>100 (strict)</span>
@@ -616,7 +616,7 @@ export function Signals() {
                         ? d === 'LONG'  ? 'bg-emerald-15 text-emerald-400 border-emerald-30'
                         : d === 'SHORT' ? 'bg-red-15 text-red-400 border-red-30'
                         : 'bg-slate-500/15 text-slate-300 border-slate-500/30'
-                        : 'bg-dark-800 text-slate-500 border-dark-900 hover:text-slate-300'
+                        : 'bg-inset text-slate-500 border-token hover:text-slate-300'
                     }`}>{d}</button>
                 ))}
               </div>
@@ -633,7 +633,7 @@ export function Signals() {
                         ? p === 'BUY'  ? 'bg-emerald-15 text-emerald-400 border-emerald-30'
                         : p === 'SELL' ? 'bg-red-15 text-red-400 border-red-30'
                         : 'bg-slate-500/15 text-slate-300 border-slate-500/30'
-                        : 'bg-dark-800 text-slate-500 border-dark-900 hover:text-slate-300'
+                        : 'bg-inset text-slate-500 border-token hover:text-slate-300'
                     }`}>{p}</button>
                 ))}
               </div>
@@ -646,7 +646,7 @@ export function Signals() {
                 <input type="range" min="0" max="100" step="5"
                   value={filterLayerMin}
                   onChange={e => setFilterLayerMin(Number(e.target.value))}
-                  className="flex-1 h-1.5 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                  className="flex-1 h-1.5 bg-inset rounded-lg appearance-none cursor-pointer accent-primary-500"
                 />
                 <span className="text-xs font-mono text-slate-300 w-8 text-right">{filterLayerMin}</span>
               </div>
@@ -660,7 +660,7 @@ export function Signals() {
                   <button key={val} onClick={() => setFilterDays(val as number)}
                     className={`flex-1 py-1 px-1 rounded text-xs font-medium border transition-colors ${
                       filterDays === val ? 'bg-primary-15 text-primary-400 border-primary-30'
-                        : 'bg-dark-800 text-slate-500 border-dark-900 hover:text-slate-300'
+                        : 'bg-inset text-slate-500 border-token hover:text-slate-300'
                     }`}>{label}</button>
                 ))}
               </div>
@@ -814,7 +814,7 @@ export function Signals() {
         <div className="hidden xl:flex gap-6 h-full" style={{ minHeight: 0 }}>
           {/* LEFT: filtered */}
           <div className="flex-1 space-y-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 240px)' }}>
-            <div className="flex items-center justify-between sticky top-0 bg-dark-900 pb-2 z-10">
+            <div className="flex items-center justify-between sticky top-0 bg-base pb-2 z-10">
               <span className="text-sm text-slate-400">Showing {filteredSignals.length} signals</span>
               <button onClick={() => setCompareSymbol(null)} className="text-sm text-slate-400 hover:text-primary flex items-center gap-1">
                 <X className="w-3.5 h-3.5" /> Close compare
@@ -826,10 +826,10 @@ export function Signals() {
               ))}
             </div>
           </div>
-          <div className="w-px bg-dark-900 shrink-0" />
+          <div className="w-px bg-base shrink-0" />
           {/* RIGHT: comparison symbol */}
           <div className="flex-1 space-y-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 240px)' }}>
-            <div className="flex items-center justify-between sticky top-0 bg-dark-900 pb-2 z-10">
+            <div className="flex items-center justify-between sticky top-0 bg-base pb-2 z-10">
               <span className="text-sm text-primary font-semibold">Comparing {compareSymbol}</span>
               {compareSymbol !== searchSymbol && (
                 <button onClick={() => { setSearchSymbol(compareSymbol); loadSignals(); }}
@@ -851,11 +851,11 @@ export function Signals() {
             onClick={closeModal} />
 
           {/* Panel */}
-          <div className="relative w-full sm:max-w-2xl bg-dark-900 border border-dark-900 rounded-t-2xl sm:rounded-2xl shadow-panel overflow-hidden flex flex-col"
+          <div className="relative w-full sm:max-w-2xl bg-card-token border border-token rounded-t-2xl sm:rounded-2xl shadow-panel overflow-hidden flex flex-col"
             style={{ maxHeight: '85vh' }}>
 
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-900 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-token shrink-0">
               <div className="flex items-center gap-3">
                 {selectedSignal.protocol_type === 'LONG_BUY' || selectedSignal.protocol_type === 'LONG_SELL' ? (
                   <div className="w-10 h-10 rounded-lg bg-emerald-10 flex items-center justify-center">
@@ -903,10 +903,10 @@ export function Signals() {
       {showPortfolioModal && (
         <div className="fixed inset-0 z-modal flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-overlay-60 backdrop-blur-sm" onClick={closePortfolioModal} />
-          <div className="relative w-full sm:max-w-lg bg-dark-900 border border-dark-900 rounded-t-2xl sm:rounded-2xl shadow-panel overflow-hidden">
+          <div className="relative w-full sm:max-w-lg bg-card-token border border-token rounded-t-2xl sm:rounded-2xl shadow-panel overflow-hidden">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-token">
               <h2 className="text-lg font-bold text-primary flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-primary" /> Add to Portfolio
               </h2>
@@ -929,7 +929,7 @@ export function Signals() {
                     <div className="flex flex-wrap gap-2">
                       {selectedSignals.map(s => (
                         <span key={s.id}
-                          className="px-3 py-1 bg-dark-800 border border-dark-900 rounded-pill text-sm text-primary">
+                          className="px-3 py-1 bg-inset border border-token rounded-pill text-sm text-primary">
                           {s.symbol} @ ${s.entry_price?.toFixed(2) ?? '--'}
                         </span>
                       ))}
@@ -940,7 +940,7 @@ export function Signals() {
                   <div className="space-y-3">
                     <div className="text-sm text-slate-400">Configure each position</div>
                     {selectedSignals.map(s => (
-                      <div key={s.id} className="bg-dark-800 rounded-xl p-3 space-y-2">
+                      <div key={s.id} className="bg-inset rounded-xl p-3 space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-primary">{s.symbol}</span>
                           <span className="text-sm text-slate-500">Entry ${s.entry_price?.toFixed(2) ?? '--'}</span>

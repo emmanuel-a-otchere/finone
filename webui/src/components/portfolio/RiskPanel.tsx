@@ -28,7 +28,7 @@ export function RiskPanel({ selectedId, driftData }: RiskPanelProps) {
   }
 
   if (riskLoading) return (
-    <div className="bg-dark-900 border border-slate-800 rounded-xl p-12 text-center text-slate-500">Loading risk metrics...</div>
+    <div className="card p-12 text-center text-slate-500">Loading risk metrics...</div>
   );
 
   const openPositions = riskSummary?.open_positions ?? [];
@@ -51,9 +51,9 @@ export function RiskPanel({ selectedId, driftData }: RiskPanelProps) {
       {/* Top row: Drift + Concentration + Key Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {driftData && <DriftGauge maxDrift={driftData.maxDrift} />}
-        {!driftData && <div className="bg-dark-900 border border-slate-800 rounded-xl p-6"><h2 className="text-lg font-semibold text-white mb-4">Allocation Drift</h2><p className="text-slate-500">Add holdings to see drift analysis.</p></div>}
+        {!driftData && <div className="card p-6"><h2 className="text-lg font-semibold text-white mb-4">Allocation Drift</h2><p className="text-slate-500">Add holdings to see drift analysis.</p></div>}
 
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+        <div className="card p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Concentration Risk</h2>
           {concentration.length === 0 ? (
             <p className="text-slate-500">No open positions.</p>
@@ -68,7 +68,7 @@ export function RiskPanel({ selectedId, driftData }: RiskPanelProps) {
                       <span className="text-slate-300">{c.symbol}</span>
                       <span className="text-slate-400">{c.pct.toFixed(1)}%</span>
                     </div>
-                    <div className="h-2 bg-dark-800 rounded-full overflow-hidden">
+                    <div className="h-2 bg-inset rounded-full overflow-hidden">
                       <div className="h-full bg-primary-500 rounded-full" style={{ width: `${Math.min(c.pct, 100)}%` }} />
                     </div>
                   </div>
@@ -78,7 +78,7 @@ export function RiskPanel({ selectedId, driftData }: RiskPanelProps) {
           )}
         </div>
 
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+        <div className="card p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Key Risk Metrics</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -107,18 +107,18 @@ export function RiskPanel({ selectedId, driftData }: RiskPanelProps) {
 
       {/* Sector drift detail */}
       {driftData && (
-        <div className="bg-dark-900 border border-slate-800 rounded-xl p-6">
+        <div className="card p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Sector Drift Detail</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {driftData.drifts.map(d => (
-              <div key={d.sector} className="bg-dark-800 rounded-lg p-4">
+              <div key={d.sector} className="bg-inset rounded-lg p-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-slate-300 font-medium">{d.sector}</span>
                   <span className={Math.abs(d.drift) > 8 ? 'text-danger-400' : Math.abs(d.drift) > 3 ? 'text-warning-400' : 'text-success-400'}>
                     {d.drift >= 0 ? '+' : ''}{d.drift.toFixed(1)}%
                   </span>
                 </div>
-                <div className="h-2 bg-dark-900 rounded-full overflow-hidden mb-2">
+                <div className="h-2 bg-base rounded-full overflow-hidden mb-2">
                   <div className="h-full rounded-full" style={{
                     width: `${Math.min(Math.abs(d.drift) / 20 * 100, 100)}%`,
                     background: Math.abs(d.drift) > 8 ? 'var(--red)' : Math.abs(d.drift) > 3 ? 'var(--yellow)' : 'var(--green)',
