@@ -102,6 +102,9 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   bootstrapped: boolean;
+  /** True when authenticated via single-user bootstrap — Sign Out is hidden
+      (it would strand the user on a login page the backend can't serve). */
+  singleUser: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   bootstrap: () => Promise<void>;
