@@ -23,11 +23,14 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(auth_router)
-app.include_router(analysis_router, prefix="/api")
-app.include_router(strategy_router, prefix="/api")
-app.include_router(strategy_engine_router, prefix="/api")
-app.include_router(sizing_router, prefix="/api")
-app.include_router(positions_router, prefix="/api")
+# NOTE: no prefix="/api" here — the frontend reaches these via /api/core/*,
+# which the proxy (Vite/Caddy) strips before forwarding. Mounting them with an
+# extra /api prefix made every analysis/strategy/positions endpoint 404.
+app.include_router(analysis_router)
+app.include_router(strategy_router)
+app.include_router(strategy_engine_router)
+app.include_router(sizing_router)
+app.include_router(positions_router)
 app.include_router(signals_router)
 app.include_router(portfolio_router)
 app.include_router(layers_router)

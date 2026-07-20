@@ -231,7 +231,7 @@ function SearchBar({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
 export function Header({ onNavigate, pageTitle }: HeaderProps) {
   const { toggleTheme, isDark } = useTheme();
-  const { user, logout }       = useAuth();
+  const { user, logout, singleUser } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -349,12 +349,20 @@ export function Header({ onNavigate, pageTitle }: HeaderProps) {
             <div style={{ padding: '8px 12px 6px', fontSize: 11, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-default)', marginBottom: 6 }}>
               {user?.username ?? 'User'}
             </div>
-            <button
-              onClick={handleLogout}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', display: 'flex', padding: '6px 12px', width: '100%', fontSize: 12, fontFamily: 'var(--font-ui)' }}
-            >
-              Sign Out
-            </button>
+            {singleUser ? (
+              // Single-user mode: signing out would strand the user on a login
+              // page the backend has no accounts for — offer no exit.
+              <div style={{ padding: '6px 12px', fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-ui)' }}>
+                Personal mode
+              </div>
+            ) : (
+              <button
+                onClick={handleLogout}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', display: 'flex', padding: '6px 12px', width: '100%', fontSize: 12, fontFamily: 'var(--font-ui)' }}
+              >
+                Sign Out
+              </button>
+            )}
           </div>
         )}
       </div>

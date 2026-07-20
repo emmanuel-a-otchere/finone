@@ -138,16 +138,13 @@ export default function App() {
   // single-user mode; otherwise falls back to the login page.
   useEffect(() => { bootstrap(); }, []);
 
-  // Map URL path -> NavId
+  // Map URL path -> NavId. PAGE_TITLES covers every NavId (incl. sub-pages),
+  // so refreshing or using back/forward on /portfolio-holdings etc. restores
+  // the sub-page instead of falling through to the dashboard. Garbage paths
+  // still fall back to the dashboard.
   function pathToNavId(path: string): NavId {
-    const p = path.replace(/^\//, '').split('/')[0] || 'dashboard';
-    const map: Record<string, NavId> = {
-      'dashboard': 'dashboard', 'market': 'market', 'signals': 'signals',
-      'screener': 'screener', 'layers': 'layers', 'portfolio': 'portfolio',
-      'watchlist': 'watchlist', 'news': 'news', 'alerts': 'alerts',
-      'reports': 'reports', 'settings': 'settings',
-    };
-    return map[p] ?? 'dashboard';
+    const p = path.replace(/^\//, '').split('/')[0].split('?')[0] || 'dashboard';
+    return p in PAGE_TITLES ? (p as NavId) : 'dashboard';
   }
 
   // currentPage derived from URL on mount
