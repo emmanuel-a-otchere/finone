@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { type NavId } from '../NavId';
+import { useTheme } from '../hooks/useTheme';
 
 interface CommandItem {
   id: string;
@@ -29,15 +30,14 @@ const PAGES: CommandItem[] = [
   { id: 'settings', label: 'Settings',           icon: '⚙', category: 'page', action: () => {} },
 ];
 
+// Actions must DO something — dead no-op commands were removed (QA #20).
+// Page-backed actions navigate; theme-toggle flips the theme.
 const ACTIONS: CommandItem[] = [
   { id: 'generate-signal', label: 'Generate Signal',       sublabel: 'Analyze a symbol', icon: '⚡', category: 'action', action: () => {} },
   { id: 'new-portfolio',   label: 'New Portfolio',          sublabel: 'Create a portfolio', icon: '💼', category: 'action', action: () => {} },
   { id: 'add-watchlist',   label: 'Add to Watchlist',      sublabel: 'Add symbol to watchlist', icon: '⭐', category: 'action', action: () => {} },
   { id: 'set-alert',       label: 'Set Price Alert',        sublabel: 'Create a price alert', icon: '🔔', category: 'action', action: () => {} },
-  { id: 'run-backtest',    label: 'Run Backtest',           sublabel: 'Test a strategy', icon: '📊', category: 'action', action: () => {} },
-  { id: 'export-data',     label: 'Export Data',            sublabel: 'Download CSV/JSON', icon: '📥', category: 'action', action: () => {} },
-  { id: 'theme-toggle',   label: 'Toggle Theme',           sublabel: 'Switch dark/light', icon: '🌓', category: 'action', action: () => {} },
-  { id: 'keyboard-help',  label: 'Keyboard Shortcuts',     sublabel: 'View all shortcuts', icon: '⌨', category: 'action', action: () => {} },
+  { id: 'theme-toggle',    label: 'Toggle Theme',           sublabel: 'Switch dark/light', icon: '🌓', category: 'action', action: () => {} },
 ];
 
 const CATEGORY_LABELS: Record<CommandItem['category'], string> = {
@@ -83,6 +83,19 @@ export function GlobalCommandBar({ onNavigate, onClose }: GlobalCommandBarProps)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const { toggleTheme } = useTheme();
+
+  // Every action resolves to a real behavior (QA #20 — no dead commands).
+  const resolveAction = (id: string): (() => void) => {
+    switch (id) {
+      case 'generate-signal': return () => onNavigate('signals');
+      case 'new-portfolio':   return () => onNavigate('portfolio');
+      case 'add-watchlist':   return () => onNavigate('watchlist');
+      case 'set-alert':       return () => onNavigate('alerts');
+      case 'theme-toggle':    return toggleTheme;
+      default:                return () => {};
+    }
+  };
 
   const filtered = CATEGORY_ORDER
     .map(cat => ({
@@ -91,10 +104,10 @@ export function GlobalCommandBar({ onNavigate, onClose }: GlobalCommandBarProps)
       items: (cat === 'page' ? PAGES : cat === 'action' ? ACTIONS : [])
         .filter(item => fuzzyMatch(item.label, query) || (item.sublabel && fuzzyMatch(item.sublabel, query)))
         .map(item => {
-          // Wire page navigations to onNavigate; actions stay as-is
+          // Wire page navigations to onNavigate; actions to real behaviors
           const action = cat === 'page'
             ? (() => { onNavigate(item.id as NavId); onClose(); })
-            : (() => { item.action(); onClose(); });
+            : (() => { resolveAction(item.id)(); onClose(); });
           return { ...item, action };
         }),
     }))
