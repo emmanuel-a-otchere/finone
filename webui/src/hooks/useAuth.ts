@@ -10,6 +10,7 @@ export const useAuth = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       bootstrapped: false,
+      singleUser: false,
 
       login: async (username: string, password: string) => {
         try {
@@ -19,6 +20,7 @@ export const useAuth = create<AuthState>()(
             user: { username },
             token: data.access_token,
             isAuthenticated: true,
+            singleUser: false,
           });
           return true;
         } catch {
@@ -49,6 +51,7 @@ export const useAuth = create<AuthState>()(
             user: { username },
             token: access_token,
             isAuthenticated: true,
+            singleUser: true,
           });
         } catch {
           // Multi-user mode — fall through to LoginPage.

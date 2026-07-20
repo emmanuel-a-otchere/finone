@@ -15,6 +15,17 @@
         reverse_proxy intelligence-api:8002
     }
 
+    # Market routes keep their /api/market prefix on the backend
+    handle /api/market/* {
+        reverse_proxy core-engine:8001
+    }
+
+    # /api/symbols/* -> /symbols/* on the backend
+    handle /api/symbols/* {
+        uri strip_prefix /api
+        reverse_proxy core-engine:8001
+    }
+
     handle_path /ws {
         reverse_proxy core-engine:8001
     }
@@ -23,6 +34,4 @@
     log {
         output stdout
     }
-}
-
 }
