@@ -10,6 +10,7 @@ forecasting across three time horizons, and delivers real-time market intelligen
 through a spec-compliant React dashboard.
 
 Live market data from Yahoo Finance — **no API keys required**.
+It's work in progress in my free time. 
 
 ---
 
@@ -34,35 +35,35 @@ Browser
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  WebUI (React 19 + Vite + TypeScript + TailwindCSS)        │
-│  Port 5173 (dev)  ·  Vite proxy → /api/core, /api/intel    │
+│  WebUI (React 19 + Vite + TypeScript + TailwindCSS)         │
+│  Port 5173 (dev)  ·  Vite proxy → /api/core, /api/intel     │
 └────────────────────────────┬────────────────────────────────┘
                              │ HTTP JSON
                              ▼
-┌────────────────────────────┐   ┌─────────────────────────────┐
+┌─────────────────────────────┐   ┌──────────────────────────────┐
 │  Core Engine  (FastAPI)     │   │  Intelligence API  (FastAPI) │
 │  Port 8001                  │   │  Port 8002                   │
 │  Signals · Auth · Portfolio │   │  XGBoost · LSTM · Sentiment  │
-│  Market data · Screener     │   │  Portfolio optimization       │
-└────────────┬───────────────┘   └──────────────┬──────────────┘
-             │                                  │
-     ┌───────┴───────────────────────────────┐  │
-     ▼                                       ▼  │
-┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│ PostgreSQL  │  │    Redis    │  │   Celery Workers     │  │
-│ +TimescaleDB│  │   Broker /  │  │  Periodic / Async    │  │
-│  Port 5432  │  │   Cache     │  └─────────────────────┘  │
+│  Market data · Screener     │   │  Portfolio optimization      │
+└────────────┬────────────────┘   └──────────────┬───────────────┘
+             │                                   │
+     ┌───────┴───────────────────────────────┐   │
+     ▼                                       ▼   │
+┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  
+│ PostgreSQL  │  │    Redis    │  │   Celery Workers    │  
+│ +TimescaleDB│  │   Broker /  │  │  Periodic / Async   │  
+│  Port 5432  │  │   Cache     │  └─────────────────────┘  
 └─────────────┘  │  Port 6379  │
                  └─────────────┘
 ```
 
 ### Services
 
-| Service | Port | Role |
-|---|---|---|
-| `webui` | 5173 | React dashboard — all user-facing UI |
-| `core-engine` | 8001 | Signals, auth, portfolios, market data, screener |
-| `intelligence` | 8002 | XGBoost forecasting, sentiment analysis, optimization |
+|     Service     | Port |                         Role                          |
+|-----------------|------|-------------------------------------------------------|
+| `webui`         | 5173 | React dashboard — all user-facing UI                  |
+| `core-engine`   | 8001 | Signals, auth, portfolios, market data, screener      |
+| `intelligence`  | 8002 | XGBoost forecasting, sentiment analysis, optimization |
 
 ---
 
